@@ -1,0 +1,7 @@
+--vocabulary Data/ORBvoc.txt --config Data/Settings.NewCollege.yaml
+
+--vocabulary Data/ORBvoc.txt --config Data/Settings.NewCollege.yaml --loadmap --video ~/Data/NewCollege/LeftCamera.avi
+
+
+--vocabulary Data/ORBvoc.txt --config Data/Settings.NewCollege.yaml --loadmap --video ~/Data/NewCollege/LeftCamera.avi --seek=65
+
