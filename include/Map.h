@@ -32,6 +32,7 @@
 #define PCL_NO_PRECOMPILE
 #include <pcl/point_cloud.h>
 #include <pcl/octree/octree.h>
+#include <pcl/octree/impl/octree_search.hpp>
 
 
 namespace ORB_SLAM
