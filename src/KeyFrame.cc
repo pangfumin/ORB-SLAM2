@@ -65,6 +65,17 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
     if (KeyFrame::loopCloser != NULL) {
     	boost::mutex::scoped_lock lock(KeyFrame::loopCloser->extPoseMutex);
     	Converter::tfToCV(KeyFrame::loopCloser->extPose, extPosition, extOrientation);
+//    	cout << " " << loopCloser->extPose.getOrigin().x()
+//    		<< " " << loopCloser->extPose.getOrigin().y()
+//			<< " " << loopCloser->extPose.getOrigin().z()
+//			<< endl;
+//    	extPose[0] = KeyFrame::loopCloser->extPose.getOrigin().x();
+//    	extPose[1] = KeyFrame::loopCloser->extPose.getOrigin().y();
+//    	extPose[2] = KeyFrame::loopCloser->extPose.getOrigin().z();
+//    	extPose[3] = KeyFrame::loopCloser->extPose.getRotation().x();
+//    	extPose[4] = KeyFrame::loopCloser->extPose.getRotation().y();
+//    	extPose[5] = KeyFrame::loopCloser->extPose.getRotation().z();
+//    	extPose[6] = KeyFrame::loopCloser->extPose.getRotation().w();
     }
 }
 

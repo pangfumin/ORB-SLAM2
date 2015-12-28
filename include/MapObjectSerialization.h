@@ -283,6 +283,7 @@ void save (Archive & ar, const ORB_SLAM::KeyFrame &keyframe, const unsigned int 
 	ar & mapPointIdList;
 
 	ar & keyframe.extPosition & keyframe.extOrientation;
+//	ar & keyframe.extPose;
 }
 
 

@@ -232,8 +232,8 @@ bool LoopClosing::DetectLoop()
 }
 
 
-const string ndtFrameSrc = "/map",
-	ndtFrameDst = "/base_link";
+const string ndtFrameSrc = "/base_link",
+	ndtFrameDst = "/map";
 
 void LoopClosing::checkPosition()
 {
