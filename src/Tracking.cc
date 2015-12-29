@@ -1278,7 +1278,8 @@ void Tracking::CheckResetByPublishers()
 }
 
 
-#define DEFAULT_KEYFRAME_OFFSET 100
+#define DEFAULT_KEYFRAME_OFFSET 10
+#define DEFAULT_OFFSET_TIME 2.5
 
 
 void Tracking::externalLocalise (const tf::Transform &tfOrb, tf::Transform &tfExt)
@@ -1286,6 +1287,8 @@ void Tracking::externalLocalise (const tf::Transform &tfOrb, tf::Transform &tfEx
     // Try looking for nearest keyframe
 	tf::Vector3 V = tfOrb.getOrigin();
     KeyFrame *kfNear = mpMap->getNearestKeyFrame(V.x(), V.y(), V.z());
+    tfExt = Converter::KeyFramePoseToTf(kfNear); return;
+    KeyFrame *kfOfftime = mpMap->offsetKeyframe(kfNear, (float)DEFAULT_OFFSET_TIME);
 
     // Find Offset KeyFrame
     KeyFrame *kp = mpMap->offsetKeyframe(kfNear, DEFAULT_KEYFRAME_OFFSET);
@@ -1302,7 +1305,8 @@ void Tracking::externalLocalise (const tf::Transform &tfOrb, tf::Transform &tfEx
     flipAxes.setRotation (tf::Quaternion(M_PI/2, 0, -M_PI/2).normalize());
 
     tf::Transform kfTr = Converter::KeyFramePoseToTf(kfNear);
-    tf::Transform extRef = Converter::getKeyFrameExtPose(kfNear);
+    tf::Transform extRef = Converter::getKeyFrameExtPose(kfOfftime);
+//    tf::Transform extRef = Converter::getKeyFrameExtPose(kfNear);
     tf::Transform orbRel = kfTr.inverse() * tfOrb;
     tf::Transform scaledRel = orbRel;
     scaledRel.setOrigin(orbRel.getOrigin() * scale);
