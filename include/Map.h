@@ -101,6 +101,7 @@ public:
 
 	KeyFrame* getNearestKeyFrame (const float &x, const float &y, const float &z);
 	KeyFrame* offsetKeyframe (KeyFrame* kfSrc, int offset);
+	KeyFrame* offsetKeyframe (KeyFrame* kfSrc, float offset);
 	std::vector<KeyFrame*> kfListSorted;
 	std::map<KeyFrame*, int> kfMapSortedId;
 

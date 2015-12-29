@@ -1308,7 +1308,7 @@ void Tracking::externalLocalise (const tf::Transform &tfOrb, tf::Transform &tfEx
     scaledRel.setOrigin(orbRel.getOrigin() * scale);
     scaledRel = flipAxes*scaledRel;
 
-//    tfExt = extRef * scaledRel;
+    tfExt = extRef * scaledRel;
 //    cout << tfExt.getOrigin().x()
 //    	<< " " << tfExt.getOrigin().y()
 //		<< " " << tfExt.getOrigin().z()

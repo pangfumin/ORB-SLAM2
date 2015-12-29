@@ -336,4 +336,15 @@ KeyFrame* Map::offsetKeyframe(KeyFrame *kfSrc, int offset)
 }
 
 
+KeyFrame* Map::offsetKeyframe (KeyFrame* kfSrc, float offset)
+{
+	int p = kfMapSortedId.at(kfSrc);
+	int i;
+	if (offset > 0)
+		for (i=p; kfListSorted.at(i)->mTimeStamp < kfSrc->mTimeStamp+offset; i++);
+	else
+		for (i=p; kfListSorted.at(i)->mTimeStamp > kfSrc->mTimeStamp+offset; i++);
+	return kfListSorted.at(i);
+}
+
 } //namespace ORB_SLAM
