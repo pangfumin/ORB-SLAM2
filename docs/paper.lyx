@@ -3,6 +3,9 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\usepackage{hyperref}
+\end_preamble
 \use_default_options true
 \maintain_unincluded_children false
 \language english
@@ -25,6 +28,7 @@
 \bibtex_command default
 \index_command default
 \paperfontsize default
+\spacing single
 \use_hyperref false
 \papersize default
 \use_geometry false
@@ -71,8 +75,77 @@ Adi Sujiwo and Eijiro Takeuchi
 Introduction
 \end_layout
 
+\begin_layout Subsection
+Background
+\end_layout
+
+\begin_layout Standard
+The importance of vision-based localization can not be understated.
+\end_layout
+
+\begin_layout Standard
+To the best of our knowledge, it is the first implementation of monocular
+ vision-based localization in Tsukuba Challenge.
+\end_layout
+
+\begin_layout Standard
+Our primary reason for choosing ORB-SLAM is related in our work in autonomous
+ vehicles, which requires localization methods using monocular camera and
+ provides capability for lifelong mapping.
+ 
+\end_layout
+
+\begin_layout Subsection
+Objectives
+\end_layout
+
+\begin_layout Standard
+In the Tsukuba Challenge, we would like to evaluate effectiveness of ORB-SLAM
+ and compare the localization results against LIDAR-based method as ground
+ truth.
+\end_layout
+
 \begin_layout Section
 Related Works
+\end_layout
+
+\begin_layout Subsection
+Monocular SLAM
+\end_layout
+
+\begin_layout Standard
+Besides ORB-SLAM, there have been a number of monocular SLAM with complete
+ public implementation.
+ Of particular mention are PTAM by 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "klein2007parallel"
+
+\end_inset
+
+, and LSD-SLAM by 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "engel2014lsdslam"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+ORB-SLAM itself was described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "mur-artal2015orbslam"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Velodyne SLAM
 \end_layout
 
 \begin_layout Section
@@ -97,6 +170,21 @@ Relocalisation and Tracking
 
 \begin_layout Subsection
 Problems
+\end_layout
+
+\begin_layout Section
+Bibliography
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "ZoteroLibrary"
+options "ieeetr"
+
+\end_inset
+
+
 \end_layout
 
 \end_body

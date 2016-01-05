@@ -2,3 +2,4 @@ Data/ORBvoc.txt
 bin/*
 lib/*
 src/*pyc
+*/*~

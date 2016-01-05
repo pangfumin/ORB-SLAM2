@@ -1,0 +1,51 @@
+﻿0_GHUNRK34 0_R3SV983B 0_5ZCJ2GBQ
+
+@inproceedings{klein2007parallel,
+	title = {Parallel {Tracking} and {Mapping} for {Small} {AR} {Workspaces}},
+	doi = {10.1109/ISMAR.2007.4538852},
+	abstract = {This paper presents a method of estimating camera pose in an unknown scene. While this has previously been attempted by adapting SLAM algorithms developed for robotic exploration, we propose a system specifically designed to track a hand-held camera in a small AR workspace. We propose to split tracking and mapping into two separate tasks, processed in parallel threads on a dual-core computer: one thread deals with the task of robustly tracking erratic hand-held motion, while the other produces a 3D map of point features from previously observed video frames. This allows the use of computationally expensive batch optimisation techniques not usually associated with real-time operation: The result is a system that produces detailed maps with thousands of landmarks which can be tracked at frame-rate, with an accuracy and robustness rivalling that of state-of-the-art model-based systems.},
+	booktitle = {6th {IEEE} and {ACM} {International} {Symposium} on {Mixed} and {Augmented} {Reality}, 2007. {ISMAR} 2007},
+	author = {Klein, G. and Murray, D.},
+	month = nov,
+	year = {2007},
+	keywords = {Algorithm design and analysis, augmented reality, batch optimisation techniques, Cameras, Concurrent computing, hand-held camera, Handheld computers, Layout, parallel mapping, parallel tracking, robotic exploration, robot vision, Robot vision systems, Robustness, Simultaneous localization and mapping, SLAM algorithms, SLAM (robots), tracking, Yarn},
+	pages = {225--234},
+	file = {IEEE Xplore Abstract Record:/home/sujiwo/References/storage/GWIC2VMD/abs_all.html:text/html;IEEE Xplore Full Text PDF:/home/sujiwo/References/storage/VJWAJRHN/Klein dan Murray - 2007 - Parallel Tracking and Mapping for Small AR Workspa.pdf:application/pdf}
+}
+
+@incollection{engel2014lsdslam,
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {{LSD}-{SLAM}: {Large}-{Scale} {Direct} {Monocular} {SLAM}},
+	copyright = {{\textcopyright}2014 Springer International Publishing Switzerland},
+	isbn = {978-3-319-10604-5 978-3-319-10605-2},
+	shorttitle = {{LSD}-{SLAM}},
+	url = {http://link.springer.com/chapter/10.1007/978-3-319-10605-2_54},
+	abstract = {We propose a direct (feature-less) monocular SLAM algorithm which, in contrast to current state-of-the-art regarding direct methods, allows to build large-scale, consistent maps of the environment. Along with highly accurate pose estimation based on direct image alignment, the 3D environment is reconstructed in real-time as pose-graph of keyframes with associated semi-dense depth maps. These are obtained by filtering over a large number of pixelwise small-baseline stereo comparisons. The explicitly scale-drift aware formulation allows the approach to operate on challenging sequences including large variations in scene scale. Major enablers are two key novelties: (1) a novel direct tracking method which operates on sim(3){\textbackslash}mathfrak\{sim\}(3) , thereby explicitly detecting scale-drift, and (2) an elegant probabilistic solution to include the effect of noisy depth values into tracking. The resulting direct monocular SLAM system runs in real-time on a CPU.},
+	language = {en},
+	number = {8690},
+	urldate = {2014-12-15},
+	booktitle = {Computer {Vision} {\textendash} {ECCV} 2014},
+	publisher = {Springer International Publishing},
+	author = {Engel, Jakob and Sch{\"o}ps, Thomas and Cremers, Daniel},
+	editor = {Fleet, David and Pajdla, Tomas and Schiele, Bernt and Tuytelaars, Tinne},
+	month = jan,
+	year = {2014},
+	keywords = {Artificial Intelligence (incl. Robotics), Computer Graphics, Image Processing and Computer Vision, pattern recognition},
+	pages = {834--849},
+	file = {engel14eccv.pdf:/home/sujiwo/References/storage/CVS4AHD6/engel14eccv.pdf:application/pdf;Snapshot:/home/sujiwo/References/storage/DJVD5DXZ/978-3-319-10605-2_54.html:text/html}
+}
+
+@article{mur-artal2015orbslam,
+	title = {{ORB}-{SLAM}: a {Versatile} and {Accurate} {Monocular} {SLAM} {System}},
+	shorttitle = {{ORB}-{SLAM}},
+	url = {http://arxiv.org/abs/1502.00956},
+	abstract = {The gold standard method for tridimensional reconstruction and camera localization from a set of images is well known to be Bundle Adjustment (BA). Although BA was regarded for years as a costly method restricted to the offline domain, several real time algorithms based on BA flourished in the last decade. However those algorithms were limited to perform SLAM in small scenes or only Visual Odometry. In this work we built on excellent algorithms of the last years to design from scratch a Monocular SLAM system that operates in real time, in small and large, indoor and outdoor environments, with the capability of wide baseline loop closing and relocalization, and including full automatic initialization. Our survival of the fittest approach to select the points and keyframes of the reconstruction generates a compact and trackable map that only grows if the scene content changes, enhancing lifelong operation. We present an exhaustive evaluation in 27 sequences from the most popular datasets achieving unprecedented performance with a typical localization accuracy from 0.2\% to 1\% of the trajectory dimension in scenes from a desk to several city blocks. We make public a ROS implementation.},
+	urldate = {2015-05-15},
+	journal = {arXiv:1502.00956 [cs]},
+	author = {Mur-Artal, Raul and Montiel, J. M. M. and Tardos, Juan D.},
+	month = feb,
+	year = {2015},
+	note = {arXiv: 1502.00956},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Robotics},
+	file = {arXiv.org Snapshot:/home/sujiwo/References/storage/5N7BQWAF/1502.html:text/html;Mur-Artal et al_2015_ORB-SLAM.pdf:/home/sujiwo/References/storage/T7DCQJN7/Mur-Artal et al_2015_ORB-SLAM.pdf:application/pdf}
+}
