@@ -321,12 +321,108 @@ Map storage consists of three main parts: Keyframes, Map points (and reference
  to which keyframe they belong)
 \end_layout
 
-\begin_layout Subsubsection
-Localization Using Augmented Positioning
+\begin_layout Standard
+During map restoration, the system reconstructs the following data structures:
+\end_layout
+
+\begin_layout Enumerate
+Keyframe list and visibility graph
+\end_layout
+
+\begin_layout Enumerate
+Map point list
+\end_layout
+
+\begin_layout Enumerate
+Octree of keyframe position in ORB-SLAM coordinate.
+ This tree will be used for fast searching of keyframes during localization
+ using augmented positioning.
 \end_layout
 
 \begin_layout Subsubsection
-Place Recognition
+Localization-only Using Augmented Positioning
+\end_layout
+
+\begin_layout Standard
+In the localization-only process, the system depends solely on ORB-SLAM
+ method.
+ Therefore, external method such as velodyne LIDAR is not required.
+ However, the system modifies position value to correct distance distortion
+ according to this formula:
+\end_layout
+
+\begin_layout Enumerate
+Take original ORB-SLAM positioning result as 
+\begin_inset Formula $P_{o}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Search the nearest keyframe from 
+\begin_inset Formula $P_{o}$
+\end_inset
+
+ using previous octree.
+ From here, we take the corresponding Velodyne SLAM position 
+\begin_inset Formula $P_{n}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Find the previous keyframe 
+\begin_inset Formula $P_{o'}$
+\end_inset
+
+ and its corresponding Velodyne SLAM position 
+\begin_inset Formula $P_{n'}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Compute distance scale: 
+\begin_inset Formula 
+\[
+s=\frac{\left\Vert P_{n'}-P_{n}\right\Vert }{\left\Vert P_{o'}-P_{o}\right\Vert }
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Apply distance scale to correct current position:
+\begin_inset Formula 
+\[
+P_{c}=P_{n}+s(P_{o}-P_{o'})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Place Recognition after Map Restoration
+\end_layout
+
+\begin_layout Standard
+By default, ORB-SLAM will try to find position against last keyframe when
+ it ever get lost.
+ However, it is impractical after map restoration, because last keyframe
+ is unknown.
+ Instead, we modify ORB-SLAM to force it finding the most appropriate keyframe
+ using bag-of-word method.
+ Keyframe search is also applied when the system lost tracking, to ensure
+ that the system always get the keyframe as basis for relocalization.
+ The drawback is that keyframe search using bag-of-word is slower than tracking
+ using last keyframe.
 \end_layout
 
 \begin_layout Section
