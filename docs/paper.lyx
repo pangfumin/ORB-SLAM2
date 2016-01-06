@@ -447,11 +447,8 @@ Evaluation
 \end_layout
 
 \begin_layout Standard
-<<<<<<< HEAD
-We generated two maps 
-=======
-We performed four runs of robot by tracing the trajectory mandated by Tsukuba
- Challenge committee.
+<<<<<<< HEADWe generated two maps =======We performed four runs of robot
+ by tracing the trajectory mandated by Tsukuba Challenge committee.
  In each run, we recorded camera images and performed localization using
  Velodyne LIDAR using two different computers due to high computational
  requirement.
@@ -554,7 +551,6 @@ Ground truth from Velodyne SLAM.
 
 \begin_layout Subsection
 First Position Fix
->>>>>>> bca1e984a3c36bf08ed6b05bbc24919e13f956fb
 \end_layout
 
 \begin_layout Subsection
