@@ -71,6 +71,16 @@ Vision-based Localization and Navigation using ORB-SLAM in Tsukuba Challenge
 Adi Sujiwo, Eijiro Takeuchi and Tomohito Ando
 \end_layout
 
+\begin_layout Abstract
+In 2015 Tsukuba Challenge, we have realized an implementation of vision-based
+ localization based on ORB-SLAM.
+ Our method combined mapping based on ORB-SLAM and Velodyne LIDAR SLAM,
+ and utilized these maps in localization process using solely monocular
+ camera.
+ This approach delivered better accuracy compared to original ORB-SLAM,
+ which suffers from scale problems and experienced map distance distortion.
+\end_layout
+
 \begin_layout Section
 Introduction
 \end_layout
@@ -80,12 +90,19 @@ Background
 \end_layout
 
 \begin_layout Standard
-The importance of vision-based localization can not be understated.
+The importance of vision-based localization can not be overstated.
+ In applications like autonomous vehicle, this localization method will
+ significantly reduce cost for manufacturer, which previously must use LIDAR-bas
+ed solutions.
+ However, vision-based methods are usually avoided due to inaccuracy when
+ compared to LIDAR-based methods.
 \end_layout
 
 \begin_layout Standard
 To the best of our knowledge, it is the first implementation of monocular
  vision-based localization in Tsukuba Challenge.
+ Previous methods for localization usually employs LIDAR-based methods,
+ either 2D or 3D.
 \end_layout
 
 \begin_layout Standard
@@ -533,7 +550,7 @@ Ground truth from Velodyne SLAM.
 \end_layout
 
 \begin_layout Subsection
-First Position Fix 
+First Position Fix
 \end_layout
 
 \begin_layout Subsection
