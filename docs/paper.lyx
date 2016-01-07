@@ -447,15 +447,15 @@ Evaluation
 \end_layout
 
 \begin_layout Standard
-<<<<<<< HEADWe generated two maps =======We performed four runs of robot
- by tracing the trajectory mandated by Tsukuba Challenge committee.
+We performed four runs of robot by tracing the trajectory mandated by Tsukuba
+ Challenge committee.
  In each run, we recorded camera images and performed localization using
  Velodyne LIDAR using two different computers due to high computational
  requirement.
  Clocks of both computers were not synchronized.
  From these runs, we created two maps for localization process.
  Velodyne LIDAR results would be used as ground truth for comparison.
- To reduce computation, camera image resolution was reduced from 
+ To reduce computation, camera resolution was reduced from 
 \begin_inset Formula $1920\times1440$
 \end_inset
 
