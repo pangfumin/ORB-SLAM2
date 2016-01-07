@@ -206,6 +206,15 @@ class PoseTable :
             child_frame_id = msg.transforms[0].child_frame_id
             frames.add((header.frame_id, child_frame_id))
         return frames
+        
+    # Find all poses in current table that are in range of targetPoses timeframe
+    def getAllInTimeRanges (self, targetPoses):
+        matchInTime = PoseTable()
+        
+        p1 = PoseTable[0]
+        p2 = PoseTable.last()
+        
+        return matchInTime
 
 
 def OrbFixOffline (orbLocalisationBagFilename, mapCsv):
