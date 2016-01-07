@@ -211,8 +211,12 @@ class PoseTable :
     def getAllInTimeRanges (self, targetPoses):
         matchInTime = PoseTable()
         
-        p1 = PoseTable[0]
-        p2 = PoseTable.last()
+        p1 = targetPoses[0]
+        p2 = targetPoses.last()
+        
+        for p in self.table:
+            if p.timestamp >= p1.timestamp and p.timestamp<=p2.timestamp:
+                matchInTime.append (copy (p))
         
         return matchInTime
 
