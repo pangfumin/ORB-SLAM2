@@ -213,6 +213,16 @@ The whole ORB-SLAM process consists of three parallel threads: tracking,
 \end_layout
 
 \begin_layout Subsubsection
+Feature Detection
+\end_layout
+
+\begin_layout Standard
+The first step in all 3D reconstruction is to find feature points in each
+ frame.
+ ORB-SLAM uses ORB (Oriented FAST, Rotated BRIEF)
+\end_layout
+
+\begin_layout Subsubsection
 Tracking
 \end_layout
 
@@ -343,7 +353,9 @@ During map restoration, the system reconstructs the following data structures:
 \end_layout
 
 \begin_layout Enumerate
-Keyframe list and visibility graph
+Keyframe list and visibility graph.
+ The visibility graph is relation between feature points and map points
+ at which they represent, and their visibilities in keyframes.
 \end_layout
 
 \begin_layout Enumerate
@@ -363,7 +375,7 @@ Localization-only Using Augmented Positioning
 \begin_layout Standard
 In the localization-only process, the system depends solely on ORB-SLAM
  method.
- Therefore, external method such as velodyne LIDAR is not required.
+ Therefore, external methods such as velodyne LIDAR are not required.
  However, the system modifies position value to correct distance distortion
  according to this formula:
 \end_layout
@@ -423,6 +435,10 @@ P_{c}=P_{n}+s(P_{o}-P_{o'})
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+In localization-only process, map modification is disabled.
 \end_layout
 
 \begin_layout Subsubsection
@@ -549,6 +565,15 @@ Ground truth from Velodyne SLAM.
 
 \begin_layout Subsection
 First Position Fix
+\end_layout
+
+\begin_layout Standard
+To get initial position fix, ORB-SLAM performs keyframe search based on
+ appereances of feature points.
+ Search may returns more than one candidates, on which they will be evaluated
+ on reprojection error basis.
+ The candidates will only be accepted if ...
+ In the evaluation run however, the system was slow to get this fix
 \end_layout
 
 \begin_layout Subsection
