@@ -78,7 +78,7 @@ In 2015 Tsukuba Challenge, we have realized an implementation of vision-based
  and utilized these maps in localization process using solely monocular
  camera.
  This approach delivered better accuracy compared to original ORB-SLAM,
- which suffers from scale problems and experienced map distance distortion.
+ which suffers from scale ambiguities and experiences map distance distortion.
 \end_layout
 
 \begin_layout Section
@@ -110,6 +110,10 @@ Our primary reason for choosing ORB-SLAM is related in our work in autonomous
  vehicles, which requires localization methods using monocular camera and
  provides capability for lifelong mapping.
  
+\end_layout
+
+\begin_layout Standard
+Our challenge ...
 \end_layout
 
 \begin_layout Subsection
@@ -159,6 +163,38 @@ key "mur-artal2015orbslam"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+All monocular SLAM methods are based on 3D reconstruction from multiple
+ view of scenes 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "fuentes-pacheco2015visualsimultaneous"
+
+\end_inset
+
+, which in turn are based on Structure from Motion.
+ As stated in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "szeliski1997shapeambiguities"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lourakis2013accurate"
+
+\end_inset
+
+, all monocular structure from motion methods inherit common scale ambiguities,
+ which consists in the fact that the recovered 3D structures and camera
+ motion are defined up to an unknown scale factor which cannot be determined
+ from image streams alone.
+ This is because if the scene and camera are scaled together, this change
+ will not be indistinguishable in the captured images.
 \end_layout
 
 \begin_layout Subsection
@@ -219,11 +255,26 @@ Feature Detection
 \begin_layout Standard
 The first step in all 3D reconstruction is to find feature points in each
  frame.
- ORB-SLAM uses ORB (Oriented FAST, Rotated BRIEF)
+ ORB-SLAM uses ORB (Oriented FAST, Rotated BRIEF) described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rublee2011orban"
+
+\end_inset
+
+.
+ This detector has advantages such as faster computation and lower storage
+ requirement (each descriptor only needs 32 bytes), in addition to resistance
+ against rotation and noise.
 \end_layout
 
 \begin_layout Subsubsection
 Tracking
+\end_layout
+
+\begin_layout Standard
+The tracking thread is responsible for providing localization and map building.
+ After ORB corners are detected, 
 \end_layout
 
 \begin_layout Subsubsection
@@ -252,6 +303,7 @@ ORB-SLAM emits localization results in its own coordinate system, which
 
 \begin_layout Standard
 \begin_inset Float figure
+placement H
 wide false
 sideways false
 status open
@@ -310,6 +362,20 @@ reference "fig:ORB-SLAM-robot-trajectory"
 
 \begin_layout Subsubsection
 Sudden Vision Occlusion
+\end_layout
+
+\begin_layout Standard
+Any disturbances in camera vision that make it unable to view previously
+ tracked feature points may cause ORB-SLAM to lost tracking.
+ These include vision occlusion on behalf of camera and sudden rotation
+ of the robot.
+ The default behaviour of ORB-SLAM to reacquire tracking after lost event
+ is by performing relocalization from last keyframe (i.e.
+ guess pose from last known position).
+ However, this prevent the system to reacquire position especially when
+ the robot never reverses motion, and contrary to described behaviour in
+ original paper of ORB-SLAM.
+ Our solution is to force relocalization by searching all keyframes in database.
 \end_layout
 
 \begin_layout Subsubsection
@@ -458,6 +524,10 @@ By default, ORB-SLAM will try to find position against last keyframe when
  using last keyframe.
 \end_layout
 
+\begin_layout Subsubsection
+Using Multiple Maps
+\end_layout
+
 \begin_layout Section
 Evaluation
 \end_layout
@@ -536,7 +606,7 @@ status open
 \align center
 \begin_inset Graphics
 	filename ndt-map-3.svg
-	lyxscale 30
+	lyxscale 70
 	width 50text%
 
 \end_inset
@@ -569,19 +639,145 @@ First Position Fix
 
 \begin_layout Standard
 To get initial position fix, ORB-SLAM performs keyframe search based on
- appereances of feature points.
+ appearances of feature points.
  Search may returns more than one candidates, on which they will be evaluated
  on reprojection error basis.
- The candidates will only be accepted if ...
- In the evaluation run however, the system was slow to get this fix
+ Only one candidate is accepted, and it must have at least 15 map points
+ that match with feature points in current frame.
+ In the evaluation run however, the system was slow to get the fix due to
+ insufficient matches.
+ One possible correction to fasten initial fix is by increasing number of
+ feature points from ORB computation.
+ However, this approach heavily slows down the search process, and does
+ not always correlate to faster fix.
 \end_layout
 
 \begin_layout Subsection
-Relocalisation and Tracking
+Tracking and Relocalization
+\end_layout
+
+\begin_layout Standard
+During our experiment, we found that ORB-SLAM is resistant against occasional
+ and partial vision occlusion.
+ Total occlusion however, may cause the system to miss tracking and difficult
+ to recover.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Using Map (M1)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Using Map (M2)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Localization Using Maps (M1) and (M2)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Loop Closing
+\end_layout
+
+\begin_layout Standard
+The Tsukuba Challenge track features some areas that are ideal to test loop
+ closing subsystem of any SLAM system.
+ However, ORB-SLAM had not able to perform loop closing where they were
+ supposed to take place.
+ An important area is the Oshimizu park subtrack, that features a small
+ roundabout with far buildings as background.
+\end_layout
+
+\begin_layout Subsection
+Accuracy of Corrected Localization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Errors of Modified ORB-SLAM compared to ground truth
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
 Problems
+\end_layout
+
+\begin_layout Subsubsection
+Recovery from Lost Tracking
 \end_layout
 
 \begin_layout Section
