@@ -219,6 +219,15 @@ class PoseTable :
                 matchInTime.append (copy (p))
         
         return matchInTime
+        
+    @staticmethod
+    def compareErrors (poseTbl1, poseTbl2):
+        errorVect = []
+        for pose in poseTbl1.table:
+            nearp = poseTbl2.findNearestByDistance(pose) [0]
+            errv = np.linalg.norm([pose.x-nearp.x, pose.y-nearp.y, pose.z-nearp.z], 2)
+            errorVect.append(errv)
+        return errorVect
 
 
 def OrbFixOffline (orbLocalisationBagFilename, mapCsv):
