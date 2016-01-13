@@ -68,7 +68,7 @@ Vision-based Localization and Navigation using ORB-SLAM in Tsukuba Challenge
 \end_layout
 
 \begin_layout Author
-Adi Sujiwo and Eijiro Takeuchi
+Adi Sujiwo, Eijiro Takeuchi and Tomohito Ando
 \end_layout
 
 \begin_layout Abstract
@@ -665,9 +665,22 @@ During our experiment, we found that ORB-SLAM is resistant against occasional
 
 \begin_layout Standard
 \begin_inset Float figure
+placement H
 wide false
 sideways false
 status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename orb-1.svg
+	lyxscale 40
+	width 70text%
+
+\end_inset
+
+
+\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -688,9 +701,22 @@ Using Map (M1)
 
 \begin_layout Standard
 \begin_inset Float figure
+placement H
 wide false
 sideways false
 status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename orb-2.svg
+	lyxscale 40
+	width 70text%
+
+\end_inset
+
+
+\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -711,6 +737,7 @@ Using Map (M2)
 
 \begin_layout Standard
 \begin_inset Float figure
+placement H
 wide false
 sideways false
 status open
