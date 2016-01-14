@@ -266,6 +266,41 @@ key "rublee2011orban"
  This detector has advantages such as faster computation and lower storage
  requirement (each descriptor only needs 32 bytes), in addition to resistance
  against rotation and noise.
+ By default, number of extracted ORB points is fixed at 1000.
+ However, we found that increasing this number up to 2500 gives many benefits,
+ including faster map initialization and resistance against image flaws
+ such as partial occlusion and lens flares.
+\end_layout
+
+\begin_layout Subsubsection
+Map Initialization
+\end_layout
+
+\begin_layout Standard
+The goal of the map initialization is to compute the relative pose between
+ two frames to triangulate an initial set of map points
+\begin_inset CommandInset citation
+LatexCommand cite
+key "mur-artal2015orbslam"
+
+\end_inset
+
+, which then will be used for keyframe tracking.
+ ORB-SLAM uses combination of homography and fundamental matrices inside
+ RANSAC scheme in order to build motion and structure recovery as described
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "faugeras1988motionand"
+
+\end_inset
+
+.
+ When this stage is succesful, the system will have an initial set of keyframes
+ and map points for which tracking may proceed.
+ However, some times tracking fails shortly after initial map is built.
+ When this is the case, initial map is deleted and initialization process
+ will start over.
 \end_layout
 
 \begin_layout Subsubsection
@@ -661,6 +696,7 @@ During our experiment, we found that ORB-SLAM is resistant against occasional
  and partial vision occlusion.
  Total occlusion however, may cause the system to miss tracking and difficult
  to recover.
+ 
 \end_layout
 
 \begin_layout Standard
