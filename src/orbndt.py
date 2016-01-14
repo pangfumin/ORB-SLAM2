@@ -222,8 +222,10 @@ class PoseTable :
         
     @staticmethod
     def compareErrors (poseTbl1, poseTbl2):
-    # poseTbl1 -> for source table
-    # poseTbl2 -> for ground truth
+        """
+        poseTbl1 -> for source table
+        poseTbl2 -> for ground truth
+        """
         errorVect = []
         i=0
         for pose in poseTbl1.table:
