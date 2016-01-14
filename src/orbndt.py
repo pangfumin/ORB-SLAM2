@@ -222,11 +222,17 @@ class PoseTable :
         
     @staticmethod
     def compareErrors (poseTbl1, poseTbl2):
+    # poseTbl1 -> for source table
+    # poseTbl2 -> for ground truth
         errorVect = []
+        i=0
         for pose in poseTbl1.table:
-            nearp = poseTbl2.findNearestByDistance(pose) [0]
+            nearp = poseTbl2.findNearestByDistance(pose)
             errv = np.linalg.norm([pose.x-nearp.x, pose.y-nearp.y, pose.z-nearp.z], 2)
             errorVect.append(errv)
+            i+=1
+            if i>=1000:
+                break
         return errorVect
 
 
@@ -288,7 +294,9 @@ def formatResultAsRecords (resultMat):
 
 
 if __name__ == '__main__' :
-    
-    orbLoc, orbMap, ndtMap = OrbFixOffline ('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151106/run1-position.bag', 
-                                            '/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151107/run1-map.csv')
-    pass
+    orbposes=PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151107/localizerResults/run2-map3.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
+    print ("ORB loaded")
+    ndtposes=PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151107/run2-autoware-2015-11-07.bag', '/map', '/base_link')
+    print ("NDT loaded")
+    errors = PoseTable.compareErrors(orbposes, ndtposes)
+    print(errors)

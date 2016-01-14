@@ -12,9 +12,9 @@
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman default
-\font_sans default
-\font_typewriter default
+\font_roman times
+\font_sans helvet
+\font_typewriter courier
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
@@ -51,7 +51,7 @@
 \paragraph_separation indent
 \paragraph_indentation default
 \quotes_language english
-\papercolumns 1
+\papercolumns 2
 \papersides 1
 \paperpagestyle default
 \tracking_changes false
@@ -64,7 +64,8 @@
 \begin_body
 
 \begin_layout Title
-Vision-based Localization and Navigation using ORB-SLAM in Tsukuba Challenge
+Monocular Vision-based Localization and Navigation using ORB-SLAM in Tsukuba
+ Challenge
 \end_layout
 
 \begin_layout Author
@@ -669,6 +670,55 @@ Ground truth from Velodyne SLAM.
 \end_layout
 
 \begin_layout Subsection
+Map Saving and Restoration
+\end_layout
+
+\begin_layout Standard
+In our experience, map saving and restoration does not affect ORB-SLAM performan
+ce.
+ In addition, the system gains useful capability: map building can now be
+ done incrementally, using same location in different time.
+ This is useful for example, to build lifelong map in different situation
+ such as weather and day/night.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename partial map.png
+	lyxscale 70
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Partial map being built after loading
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
 First Position Fix
 \end_layout
 
@@ -685,6 +735,12 @@ To get initial position fix, ORB-SLAM performs keyframe search based on
  feature points from ORB computation.
  However, this approach heavily slows down the search process, and does
  not always correlate to faster fix.
+\end_layout
+
+\begin_layout Standard
+Map initialization is also another problem.
+ During experiment, we found that initialization will succeed (and not getting
+ false initialization) whenever robot is moved, either rotation or translation.
 \end_layout
 
 \begin_layout Subsection
@@ -711,7 +767,7 @@ status open
 \begin_inset Graphics
 	filename orb-1.svg
 	lyxscale 40
-	width 70text%
+	width 100col%
 
 \end_inset
 
@@ -747,7 +803,7 @@ status open
 \begin_inset Graphics
 	filename orb-2.svg
 	lyxscale 40
-	width 70text%
+	width 100col%
 
 \end_inset
 
@@ -802,14 +858,98 @@ Loop Closing
 \begin_layout Standard
 The Tsukuba Challenge track features some areas that are ideal to test loop
  closing subsystem of any SLAM system.
- However, ORB-SLAM had not able to perform loop closing where they were
- supposed to take place.
+ However, ORB-SLAM had not able to perform loop closing when they were supposed
+ to take place.
  An important area is the Oshimizu park subtrack, that features a small
  roundabout with far buildings as background.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename loop closing failure.png
+	lyxscale 70
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One place where loop closing failed to take place.
+ Image contrast has been adjusted to lighten dark areas.
+ Notice that most ORB points (green) fell in the background cloud.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Accuracy of Corrected Localization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename path inspection.svg
+	lyxscale 70
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Visual comparison of Modified ORB-SLAM trajectory against ground truth (blue
+ curve).
+ Map 1 result is depicted in green, while map 2 is red.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure above depicts a turning situation continued by straight path.
+ In the turning, modified ORB-SLAM shows deviations compared to ground truth,
+ while straight path has less deviation.
+ It is also clear that different maps give different results, despite running
+ in the exact same path and time.
 \end_layout
 
 \begin_layout Standard
@@ -840,7 +980,16 @@ Problems
 \end_layout
 
 \begin_layout Subsubsection
-Recovery from Lost Tracking
+Lost Tracking
+\end_layout
+
+\begin_layout Subsubsection
+Incomplete Maps
+\end_layout
+
+\begin_layout Standard
+None of the maps that are complete (i.e.
+ provide keyframes that cover the whole ground truth).
 \end_layout
 
 \begin_layout Section
