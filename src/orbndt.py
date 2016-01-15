@@ -65,6 +65,17 @@ class Pose :
             pose1.y + v*(pose2.y-pose1.y),
             pose1.z + v*(pose2.z-pose1.z))
         return intpose
+        
+    @staticmethod
+    def average (*poses):
+        avgpose = Pose()
+        xs = [p.x for p in poses]
+        ys = [p.y for p in poses]
+        zs = [p.z for p in poses]
+        avgpose.x = sum(xs) / len(poses)
+        avgpose.y = sum(ys) / len(poses)
+        avgpose.z = sum(zs) / len(poses)
+        return avgpose
 
 
 class PoseTable :
@@ -102,6 +113,22 @@ class PoseTable :
             ckey = max (ckeys)
         self.idList[ckey+1] = self.c
         self.c += 1
+        
+    def length (self, tolerance=0):
+        """
+        Compute distance spanned by this pose. If miliSecTolerance is not specified, \
+        we assume that there is no gap
+        """
+        totaldist = 0
+        for p in range(1, len(self.table)):
+            cpose = self.table[p]
+            ppose = self.table[p-1]
+            if (tolerance>0) :
+                if ppose.timestamp - cpose.tolerance > tolerance:
+                    continue
+            dist = np.linalg.norm([cpose.x-ppose.x, cpose.y-ppose.y, cpose.z-ppose.z])
+            totaldist += dist
+        return totaldist
     
     def toArray (self, includeTimestamp=False):
         if (includeTimestamp==True) :
@@ -233,8 +260,9 @@ class PoseTable :
             errv = np.linalg.norm([pose.x-nearp.x, pose.y-nearp.y, pose.z-nearp.z], 2)
             errorVect.append(errv)
             i+=1
-            if i>=1000:
-                break
+            #if i>=10000:
+            #    break
+            print ("{} out of {}".format(i, len(poseTbl1)))
         return errorVect
 
 

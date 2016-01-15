@@ -1055,8 +1055,6 @@ bool Tracking::Relocalisation()
         else
         {
             int nmatches = matcher.SearchByBoW(pKF,mCurrentFrame,vvpMapPointMatches[i]);
-//            cout << '#' << pKF->mnId << " @" << mCurrentFrame.mnId << ": " << nmatches << endl;
-
             // I modified this to accelerate matching
 //            if(nmatches<15)
             if(nmatches<7)

@@ -203,6 +203,7 @@ Velodyne SLAM
 \end_layout
 
 \begin_layout Standard
+Velodyne-based SLAM is 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "moosmann2011velodyne"
@@ -310,7 +311,8 @@ Tracking
 
 \begin_layout Standard
 The tracking thread is responsible for providing localization and map building.
- After ORB corners are detected, 
+ After ORB corners are detected, tracking develops map incrementally over
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -874,7 +876,8 @@ During our experiment, we found that ORB-SLAM is resistant against occasional
  and partial vision occlusion.
  Total occlusion however, may cause the system to miss tracking and difficult
  to recover.
- 
+ This lost tracking explains existence of blank areas below (part of trajectory
+ that has no bold parts).
 \end_layout
 
 \begin_layout Standard
@@ -1102,10 +1105,6 @@ Problems
 \end_layout
 
 \begin_layout Subsubsection
-Lost Tracking
-\end_layout
-
-\begin_layout Subsubsection
 Incomplete Maps
 \end_layout
 
@@ -1114,12 +1113,33 @@ None of the maps are complete (i.e.
  provide keyframes that cover the whole ground truth).
 \end_layout
 
+\begin_layout Subsubsection
+Lost Tracking
+\end_layout
+
 \begin_layout Section
 Discussion
 \end_layout
 
 \begin_layout Subsection
 Possible Causes for Errors
+\end_layout
+
+\begin_layout Standard
+Most of errors at magnitude larger than 1m occur in difficult areas.
+ These include:
+\end_layout
+
+\begin_layout Itemize
+Turns, including a roundabout in park area
+\end_layout
+
+\begin_layout Itemize
+Acceleration and deceleration
+\end_layout
+
+\begin_layout Subsection
+Possible Causes for Lost Tracking
 \end_layout
 
 \begin_layout Subsection
