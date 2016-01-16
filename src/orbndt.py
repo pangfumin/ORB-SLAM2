@@ -137,7 +137,7 @@ class PoseTable :
             mlt = [[p.x, p.y, p.z, p.qx, p.qy, p.qz, p.qw] for p in self.table]
         return np.array(mlt)
     
-    def findNearestByTime (self, pose):
+    def findNearestByTime (self, pose, tolerance=0):
         if (pose.timestamp < self.table[0].timestamp) :
             raise KeyError ("Timestamp less than table")
         if (pose.timestamp > self.table[self.c-1].timestamp) :
@@ -158,6 +158,15 @@ class PoseTable :
             if (cpose.timestamp < pose.timestamp) :
                 candidates.add (cpose)
                 break
+        if (tolerance>0) :
+            tcandidates=[]
+            for c in candidates:
+                c.tdif = abs(c.timestamp-pose.timestamp)
+                if c.tdif > tolerance:
+                    pass
+                else:
+                    tcandidates.append(c)
+            return sorted (tcandidates, key=lambda pose: pose.tdif)
         return sorted (candidates, key=lambda pose: pose.timestamp)
         
     def findNearestByDistance (self, pose, returnIdx=False):
