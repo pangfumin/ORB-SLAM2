@@ -169,6 +169,18 @@ class PoseTable :
             return sorted (tcandidates, key=lambda pose: pose.tdif)
         return sorted (candidates, key=lambda pose: pose.timestamp)
         
+    def findNearestInTime (self, timestamp, tolerance):
+        candidates = set()
+        i = 0        
+        for p in self.table:
+            tdiff = abs(p.timestamp - timestamp)
+            if (tdiff < tolerance):
+                candidates.add(p)
+                if p.timestamp > timestamp:
+                    break
+        return min(candidates, key=lambda p: abs(p.timestamp-timestamp))
+            
+        
     def findNearestByDistance (self, pose, returnIdx=False):
         if (returnIdx==False):
             return min(self.table, 
@@ -273,6 +285,36 @@ class PoseTable :
             #    break
             print ("{} out of {}".format(i, len(poseTbl1)))
         return errorVect
+        
+    
+def joinPoseTables (*poseTbls):
+    #Find maximum & minimum time
+    mintimes = [ptb[0].timestamp for ptb in poseTbls]
+    startTime = min(mintimes)
+    maxtimes = [ptb.last().timestamp for ptb in poseTbls]
+    stopTime = max(maxtimes)
+    
+    # Find optimal time resolution
+    def timeDiffs (poseTbl) :
+        diff = []
+        for p in range(1, len(poseTbl.table)):
+            cpose = poseTbl.table[p]
+            ppose = poseTbl.table[p-1]
+            diff.append(cpose.timestamp - ppose.timestamp)
+        return diff
+    poseTblDiffs = [timeDiffs(ptbl) for ptbl in poseTbls]
+    minDiffs = [min(td) for td in poseTblDiffs]
+    timeRez = min(minDiffs)
+    
+    t = startTime
+    joinPoses = []
+    while t < stopTime:
+        cPoses = [ptbl.findNearestInTime(t, timeRez) for ptbl in poseTbls]
+        if (len(cPoses) != 0):
+            joinPoses.append(cPoses)
+        t += timeRez
+
+    return joinPoses        
 
 
 def OrbFixOffline (orbLocalisationBagFilename, mapCsv):
@@ -333,9 +375,6 @@ def formatResultAsRecords (resultMat):
 
 
 if __name__ == '__main__' :
-    orbposes=PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151107/localizerResults/run2-map3.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
-    print ("ORB loaded")
-    ndtposes=PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151107/run2-autoware-2015-11-07.bag', '/map', '/base_link')
-    print ("NDT loaded")
-    errors = PoseTable.compareErrors(orbposes, ndtposes)
-    print(errors)
+    orb1 = PoseTable.loadFromBagFile('/home/sujiwo/Data/TsukubaChallenge/run2-map1.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
+    orb2 = PoseTable.loadFromBagFile('/home/sujiwo/Data/TsukubaChallenge/run2-map3.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
+    orbj = joinPoseTables (orb1, orb2)

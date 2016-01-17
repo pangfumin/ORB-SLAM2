@@ -222,7 +222,16 @@ key "moosmann2011velodyne"
 
 \begin_layout Standard
 Velodyne-based SLAM takes 3D laser scans as input, and compose the map using
- any popular scan matching algorithms from those scans.
+ any popular scan matching algorithms from those scans (for example, normal
+ distribution transform 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "biber2003thenormal"
+
+\end_inset
+
+).
+ 
 \end_layout
 
 \begin_layout Section
