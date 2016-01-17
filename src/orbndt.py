@@ -75,6 +75,7 @@ class Pose :
         avgpose.x = sum(xs) / len(poses)
         avgpose.y = sum(ys) / len(poses)
         avgpose.z = sum(zs) / len(poses)
+        avgpose.timestamp = np.average([p.timestamp for p in poses])
         return avgpose
 
 
@@ -171,16 +172,16 @@ class PoseTable :
         
     def findNearestInTime (self, timestamp, tolerance):
         candidates = set()
-        i = 0        
         for p in self.table:
             tdiff = abs(p.timestamp - timestamp)
             if (tdiff < tolerance):
                 candidates.add(p)
-                if p.timestamp > timestamp:
-                    break
+            if p.timestamp > timestamp:
+                break
+        if (len(candidates)==0):
+            return None
         return min(candidates, key=lambda p: abs(p.timestamp-timestamp))
             
-        
     def findNearestByDistance (self, pose, returnIdx=False):
         if (returnIdx==False):
             return min(self.table, 
@@ -305,16 +306,33 @@ def joinPoseTables (*poseTbls):
     poseTblDiffs = [timeDiffs(ptbl) for ptbl in poseTbls]
     minDiffs = [min(td) for td in poseTblDiffs]
     timeRez = min(minDiffs)
-    
-    t = startTime
-    joinPoses = []
-    while t < stopTime:
-        cPoses = [ptbl.findNearestInTime(t, timeRez) for ptbl in poseTbls]
-        if (len(cPoses) != 0):
-            joinPoses.append(cPoses)
-        t += timeRez
 
-    return joinPoses        
+    poseList = set()
+    for ptbl in poseTbls:
+        for pose in ptbl.table:
+            pose.parent = ptbl
+            poseList.add(pose)
+    allPosesList = sorted(poseList, key=lambda p: p.timestamp)
+
+    jointPoses = PoseTable()    
+    for pose in allPosesList:
+        if pose not in poseList:
+            continue
+        cPoses = []
+        cPoses.append(pose)
+        for ptbl in poseTbls:
+            if (pose.parent==ptbl):
+                continue
+            friend = ptbl.findNearestInTime(pose.timestamp, 2*timeRez)
+            if friend != None and friend in poseList:
+                cPoses.append (friend)
+        poseAvg = Pose.average(*cPoses)
+        jointPoses.append(poseAvg)
+        for p in cPoses:
+            poseList.discard(p)
+        # For debugging progress
+        print ("Length: {} / {}".format(len(jointPoses), len(allPosesList)))
+    return jointPoses        
 
 
 def OrbFixOffline (orbLocalisationBagFilename, mapCsv):
