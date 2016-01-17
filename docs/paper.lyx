@@ -164,6 +164,11 @@ key "mur-artal2015orbslam"
 \end_inset
 
 .
+ Of particular note, the ORB-SLAM uses ORB (Oriented FAST, Rotated BRIEF)
+ as main feature detector, and bag-of-words method as place recognition.
+ Contrary to previous methods, ORB-SLAM generates relatively sparse maps
+ due to us of extracted feature points rather than whole scenes.
+ This gives potentially smaller maps and faster processing time.
 \end_layout
 
 \begin_layout Standard
@@ -203,7 +208,7 @@ Velodyne SLAM
 \end_layout
 
 \begin_layout Standard
-Velodyne-based SLAM is 
+Velodyne-based SLAM is explained in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "moosmann2011velodyne"
@@ -211,6 +216,13 @@ key "moosmann2011velodyne"
 \end_inset
 
 .
+ This SLAM method is popular for autonomous vehicle applications, and is
+ capable to provide accurate maps andlocalization.
+\end_layout
+
+\begin_layout Standard
+Velodyne-based SLAM takes 3D laser scans as input, and compose the map using
+ any popular scan matching algorithms from those scans.
 \end_layout
 
 \begin_layout Section
@@ -1155,7 +1167,25 @@ Suggestions
 \end_layout
 
 \begin_layout Section
-Conclusions
+Conclusions and Future Work
+\end_layout
+
+\begin_layout Standard
+This work reported our approach for localization solutions in Tsukuba Challenge.
+ Within limitations of our system, the experiments confirmed that vision-based
+ localization using augmented maps from vision and LIDAR-based methods are
+ capable to provide localization that are precise enough.
+\end_layout
+
+\begin_layout Standard
+Despite a good results, there are still some room for improvements that
+ we can propose.
+ Primarily, there must be an effort to cover the whole spectrum of localization,
+ primarily when the vision-based localization fails.
+ In this regard, we suggest next works to integrate other low-cost methods
+ such as odometry and gyroscope solutions.
+ In the field of mapping, we also suggest replacing the LIDAR to other global
+ SLAM methods, such as GPS .
 \end_layout
 
 \begin_layout Section
