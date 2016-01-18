@@ -235,7 +235,7 @@ key "biber2003thenormal"
 \end_layout
 
 \begin_layout Section
-Strategies for Vision-based Localization
+Monocular Vision-Based Localization
 \end_layout
 
 \begin_layout Standard
@@ -327,25 +327,81 @@ key "faugeras1988motionand"
 \end_layout
 
 \begin_layout Subsubsection
-Tracking
+Tracking and Local Mapping
 \end_layout
 
 \begin_layout Standard
 The tracking thread is responsible for providing localization and map building.
- After ORB corners are detected, tracking develops map incrementally over
+ After ORB corners are detected, the tracking thread develops map incrementally
+ over recovered 3D map points, meanwhile computing camera poses.
+ To speed up the process, tracking works in a smaller subset of the whole
+ map, called local map, that covers current visible and a number of connected
+ keyframes.
+ Tracking thread also performs map 
+\begin_inset Quotes eld
+\end_inset
+
+clean-up
+\begin_inset Quotes erd
+\end_inset
+
+, which is an act of culling bad map points and keyframes.
  
 \end_layout
 
-\begin_layout Subsubsection
-Local Mapping
+\begin_layout Standard
+To perform tracking, there are three modes that can be used.
+ First is relocalization by searching all keyframes by bag of words; this
+ is the slowest but indispensable when recovering from lost tracking.
+ Second is tracking the local map as described above.
+ Alternatively, third choice is tracking using constant velocity model.
+ The third choice is fastest and may be most often used mode.
+ However, it may be inaccurate.
+\end_layout
+
+\begin_layout Standard
+Occasionally, tracking thread will perform local bundle adjustment (BA)
+ to optimize current local map.
+ This action moves the keyframes in local map, and potentially marks some
+ keyframes as outliers for removal.
 \end_layout
 
 \begin_layout Subsubsection
 Loop Closing
 \end_layout
 
+\begin_layout Standard
+Loop-closure detection is crucial for enhancing the robustness of SLAM algorithm
+s, both topological and metrical.
+ This problem consists in detecting when the robot has returned to a past
+ location after having discovered new terrain for a while.
+ Such detection makes it possible to increase the precision of the actual
+ pose estimation.
+\end_layout
+
+\begin_layout Standard
+In ORB-SLAM, loop detection is performed by a separate thread that runs
+ about 200Hz.
+ This thread takes last processed keyframe and search the loop candidate
+ keyframes in local map using bag of words.
+ Next, similarity transformation is computed.
+ The loop candidate must be supported with enough map point inliers.
+ Loop correction is performed by inserting new edges in covisibility graph
+ and fixing connectivity between loop candidate and surrounding keyframes.
+ Next, ORB-SLAM performs pose graph optimization that distributes loop closing
+ errors by moving the candidate and its connected keyframes.
+ In this regard, ORB-SLAM has image-to-map approach 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "williams2009acomparison"
+
+\end_inset
+
+ for loop closing.
+\end_layout
+
 \begin_layout Subsection
-Problems in Original Implementation of ORB-SLAM
+Problems in ORB-SLAM
 \end_layout
 
 \begin_layout Subsubsection
@@ -925,6 +981,13 @@ status open
 
 \begin_layout Plain Layout
 Using Map (M1)
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Using-Map-(M1)"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -961,6 +1024,13 @@ status open
 
 \begin_layout Plain Layout
 Using Map (M2)
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Using-Map-(M2)"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -981,10 +1051,22 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename jointmap_result.svg
+	lyxscale 90
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Localization Using Maps (M1) and (M2)
+Localization Using Combined Maps (M1) and (M2)
 \end_layout
 
 \end_inset
@@ -1036,6 +1118,13 @@ status open
 One place where loop closing failed to take place.
  Image contrast has been adjusted to lighten dark areas.
  Notice that most ORB points (green) fell in the background cloud.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:loop-closing-failure"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1077,7 +1166,14 @@ status open
 \begin_layout Plain Layout
 Visual comparison of Modified ORB-SLAM trajectory against ground truth (blue
  curve).
- Map 1 result is depicted in green, while map 2 is red.
+ Map 1 result is depicted in green, while map 2 in red.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:turning-map"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1091,7 +1187,14 @@ Visual comparison of Modified ORB-SLAM trajectory against ground truth (blue
 \end_layout
 
 \begin_layout Standard
-Figure above depicts a turning situation continued by straight path.
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:turning-map"
+
+\end_inset
+
+ depicts a turning situation continued by straight path.
  In the turning, modified ORB-SLAM shows deviations compared to ground truth,
  while straight path has less deviation.
  It is also clear that different maps give different results, despite running
