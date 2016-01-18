@@ -125,7 +125,7 @@ class PoseTable :
             cpose = self.table[p]
             ppose = self.table[p-1]
             if (tolerance>0) :
-                if ppose.timestamp - cpose.tolerance > tolerance:
+                if abs(ppose.timestamp - cpose.timestamp) > tolerance:
                     continue
             dist = np.linalg.norm([cpose.x-ppose.x, cpose.y-ppose.y, cpose.z-ppose.z])
             totaldist += dist
