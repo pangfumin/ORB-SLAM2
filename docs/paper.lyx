@@ -1093,7 +1093,9 @@ reference "fig:traversing-the-map"
 
 \end_inset
 
- depicts visualization when robot traveled along previously created map.
+ depicts visualization of the robot when it traveled along previously created
+ map.
+ The map was created from different day.
  Note the slightly out-of-track position of the robot.
  In this situation, tracking was maintained.
 \end_layout
@@ -1792,7 +1794,7 @@ Contrary to original results, ORB-SLAM was unable to give excellent results
  ORB-SLAM was unable to perform place recognition using its bag-of-words
  method.
  This is supported from observation that most ORB feature points fell in
- the ground.
+ the ground covered in falling leaves.
 \end_layout
 
 \begin_layout Standard
