@@ -72,7 +72,7 @@ Monocular Vision-based Localization using ORB-SLAM with LIDAR-aided Mapping
 \end_layout
 
 \begin_layout Author
-Adi Sujiwo, Eijiro Takeuchi, Tomohito Ando and Yoshiki Ninomiya
+Adi Sujiwo, Tomohito Ando, Eijiro Takeuchi, and Yoshiki Ninomiya
 \end_layout
 
 \begin_layout Abstract
@@ -346,7 +346,7 @@ key "faugeras1988motionand"
 .
  When this stage is succesful, the system will have an initial set of keyframes
  and map points for which tracking may proceed.
- However, some times tracking fails shortly after initial map is built.
+ However, sometimes tracking fails shortly after initial map is built.
  When this is the case, initial map is deleted and initialization process
  will start over.
 \end_layout
@@ -396,8 +396,8 @@ Loop Closing
 \end_layout
 
 \begin_layout Standard
-Loop-closure detection is crucial for enhancing the robustness of SLAM algorithm
-s, both topological and metrical.
+Loop-closure detection is crucial for enhancing the accuracy of SLAM algorithms,
+ both topological and metrical.
  This problem consists of detecting when the robot has returned to a past
  location after having discovered new terrain for a while.
  Such detection makes it possible to increase the precision of the actual
@@ -405,17 +405,7 @@ s, both topological and metrical.
 \end_layout
 
 \begin_layout Standard
-In ORB-SLAM, loop detection is performed by a separate thread that runs
- about 200Hz.
- This thread takes last processed keyframe and search the loop candidate
- keyframes in local map using bag of words.
- Next, similarity transformation is computed.
- The loop candidate must be supported with enough map point inliers.
- Loop correction is performed by inserting new edges in covisibility graph
- and fixing connectivity between loop candidate and surrounding keyframes.
- Next, ORB-SLAM performs pose graph optimization that distributes loop closing
- errors by moving the candidate and its connected keyframes.
- In this regard, ORB-SLAM uses image-to-map approach 
+Essentially, loop closing in ORB-SLAM uses image-to-map approach 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "williams2009acomparison"
@@ -423,6 +413,20 @@ key "williams2009acomparison"
 \end_inset
 
  for loop closing.
+ First, it takes last processed keyframe and search the loop candidate keyframes
+ in local map using bag of words 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "galvez-lopez2012bagsof"
+
+\end_inset
+
+.
+ Next, similarity transformation is computed.
+ Loop correction is performed by inserting new edges in covisibility graph
+ and fixing connectivity between loop candidate and surrounding keyframes.
+ Next, ORB-SLAM performs pose graph optimization that distributes loop closing
+ errors by moving the candidate and its connected keyframes.
 \end_layout
 
 \begin_layout Subsection
@@ -506,6 +510,7 @@ reference "fig:ORB-SLAM-robot-trajectory"
  time).
  By zooming-in parts in red square, it is revealed that most later keyframes
  clump in a small area of the ORB-SLAM map.
+ By comparing (1) and (4), clearly ...
 \end_layout
 
 \begin_layout Subsubsection
@@ -551,7 +556,11 @@ ORB-SLAM with LIDAR-aided Mapping
 \end_layout
 
 \begin_layout Subsection
-Scale Correction
+Scale Correction in Localization
+\end_layout
+
+\begin_layout Standard
+State our motivation for using velodyne
 \end_layout
 
 \begin_layout Standard
@@ -578,7 +587,12 @@ In the localization-only process, the system depends solely on ORB-SLAM
  method.
  Therefore, external methods such as LIDAR SLAM are not required.
  However, the system modifies position value to correct distance deformation
- according to this formula:
+ according to this formula.
+ Each pose variable represents translation and rotation: 
+\begin_inset Formula $P=(\mathbf{t},\mathbf{q})=(x,y,z,q_{x},q_{y},q_{z},q_{w})$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Enumerate
@@ -590,11 +604,15 @@ Take original ORB-SLAM position as
 \end_layout
 
 \begin_layout Enumerate
-Search the nearest keyframe from 
+Search the nearest keyframe in map from 
 \begin_inset Formula $P_{o}$
 \end_inset
 
- using previous octree.
+ using previous octree as 
+\begin_inset Formula $P_{k}$
+\end_inset
+
+.
  From here, we take the corresponding Velodyne SLAM position 
 \begin_inset Formula $P_{n}$
 \end_inset
@@ -603,8 +621,8 @@ Search the nearest keyframe from
 \end_layout
 
 \begin_layout Enumerate
-Find the previous keyframe 
-\begin_inset Formula $P_{o'}$
+Find the previous offset keyframe 
+\begin_inset Formula $P_{k'}$
 \end_inset
 
  and its corresponding Velodyne SLAM position 
@@ -615,10 +633,10 @@ Find the previous keyframe
 \end_layout
 
 \begin_layout Enumerate
-Compute distance scale: 
+Compute scale correction factor: 
 \begin_inset Formula 
 \[
-s=\frac{\left\Vert P_{n'}-P_{n}\right\Vert }{\left\Vert P_{o'}-P_{o}\right\Vert }
+s=\frac{\left\Vert \mathbf{t}_{n'}-\mathbf{t}_{n}\right\Vert }{\left\Vert \mathbf{t}_{k'}-\mathbf{t}_{k}\right\Vert }
 \]
 
 \end_inset
@@ -627,10 +645,22 @@ s=\frac{\left\Vert P_{n'}-P_{n}\right\Vert }{\left\Vert P_{o'}-P_{o}\right\Vert 
 \end_layout
 
 \begin_layout Enumerate
-Apply distance scale to correct current position:
+Apply distance scale to correct current position 
+\begin_inset Formula $P_{r}=P_{o'}^{-1}P_{o}$
+\end_inset
+
+ :
 \begin_inset Formula 
 \[
-P_{c}=P_{n}+s(P_{o}-P_{o'})
+P_{r'}=(st_{r},q_{r})
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+P_{c}=P_{n}P_{r'}
 \]
 
 \end_inset
@@ -865,6 +895,12 @@ Our robot is derived from Segway RMP-200 platform, using Grasshopper3 camera
  In the course of run, robot may often encounter dynamic obstacles such
  as human or bycicle, which necessitated action by operator to either stop
  or maneuver the robot motion.
+\end_layout
+
+\begin_layout Standard
+Our track in Tsukuba Challenge was vastly different from original ORB-SLAM
+ paper evaluation.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1375,7 +1411,7 @@ Loop Closing
 \begin_layout Standard
 The Tsukuba Challenge track features some areas that are ideal to test loop
  closing subsystem of any SLAM system.
- However, ORB-SLAM had not able to perform loop closing when they were supposed
+ However, ORB-SLAM was not able to perform loop closing when they were supposed
  to take place.
  One important area is the Oshimizu park subtrack, that features a small
  roundabout with far buildings as background.
