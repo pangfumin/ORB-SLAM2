@@ -72,7 +72,7 @@ Monocular Vision-based Localization using ORB-SLAM with LIDAR-aided Mapping
 \end_layout
 
 \begin_layout Author
-Adi Sujiwo, Eijiro Takeuchi and Tomohito Ando
+Adi Sujiwo, Eijiro Takeuchi, Tomohito Ando and Yoshiki Ninomiya
 \end_layout
 
 \begin_layout Abstract
@@ -88,7 +88,8 @@ In 2015 Tsukuba Challenge, we have realized an implementation of vision-based
 \end_layout
 
 \begin_layout Abstract
-Keyword: Visual Localization, Autonomous Vehicle
+Keyword: Visual Localization, Autonomous Vehicle, Field Robotics, Tsukuba
+ Challenge
 \end_layout
 
 \begin_layout Section
@@ -752,16 +753,16 @@ reference "fig:Using-Map-(M2)"
 \end_layout
 
 \begin_layout Standard
-Our approach in fusing results from multiple maps is by simply averaging
- position data from each map.
- This process is performed each time any map (that runs their own tracking
+Our approach in fusing results from multiple maps is by averaging position
+ data from each map.
+ This process is performed each time any map (that runs in their own tracking
  threads) emits position data.
  A map is marked as fail when it does not emit position after a determined
  time interval.
 \end_layout
 
 \begin_layout Section
-Evaluation
+Evaluation in Tsukuba Challenge Environment
 \end_layout
 
 \begin_layout Standard
@@ -818,9 +819,9 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename ndt-map-3.svg
+	filename ndt-map-3.eps
 	lyxscale 70
-	width 50text%
+	width 100col%
 
 \end_inset
 
@@ -860,11 +861,10 @@ Experimental Settings
 \begin_layout Standard
 Our robot is derived from Segway RMP-200 platform, using Grasshopper3 camera
  and Velodyne HDL-32 LIDAR.
- The robot ran on the mandated Tsukuba Challenge with speed less than 1
- m/s.
+ The robot ran on the mandated Tsukuba Challenge with speed under 1 m/s.
  In the course of run, robot may often encounter dynamic obstacles such
- as human or bycicle, which necessitates intervention by operator to either
- stop or maneuver the robot motion.
+ as human or bycicle, which necessitated action by operator to either stop
+ or maneuver the robot motion.
 \end_layout
 
 \begin_layout Standard
@@ -911,10 +911,22 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename starting point.jpg
+	lyxscale 50
+	width 95col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Start Point, difficult places and Goals
+Starting Point
 \end_layout
 
 \end_inset
@@ -1008,10 +1020,221 @@ Tracking and Relocalization
 \begin_layout Standard
 During our experiment, we found that ORB-SLAM is resistant against occasional
  and partial vision occlusion.
+ Partial occlusion includes lens flares and human covering background images.
  Total occlusion however, may cause the system to miss tracking and difficult
  to recover.
  This lost tracking explains existence of blank areas below (part of trajectory
  that has no bold parts).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename tracking 1.png
+	lyxscale 60
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+ORB-SLAM performed tracking
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:tracking"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Common situation and tracking of ORB-SLAM is depicted in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:tracking"
+
+\end_inset
+
+.
+ The figure illustrates a frame, taken in Oshimizu park area with background
+ of far buildings and some trees in foreground.
+ There were also some people in the scene.
+ Most of the ORB points (and map points, shown in green dots) fell in the
+ trees and ground, but very few of those that were in background.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:traversing-the-map"
+
+\end_inset
+
+ depicts visualization when robot traveled along previously created map.
+ Note the slightly out-of-track position of the robot.
+ In this situation, tracking was maintained.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename robot traveled along the map.png
+	lyxscale 60
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Robot traversed previously created map
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:traversing-the-map"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:lost-tracking"
+
+\end_inset
+
+ depicts a situation when the robot performed violent rotation and about
+ to lost tracking.
+ Note the absence of ORB feature points in the right portion of image frame.
+ At right, the axis shows that robot is in right track, but robot is oriented
+ to a place without map points.
+ The blue axis represents front.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename about to lose tracking.png
+	lyxscale 60
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+ORB-SLAM about to lost tracking
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:lost-tracking"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Using-Map-(M1)"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Using-Map-(M2)"
+
+\end_inset
+
+ show the results from using map 1 and 2.
+ Next figure (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:joint-map-result"
+
+\end_inset
+
+) shows result using two maps.
+ The differences of using both maps are: 1) map 1 is quicker in obtaining
+ initial fix but has larger 
+\begin_inset Quotes eld
+\end_inset
+
+blank spot
+\begin_inset Quotes erd
+\end_inset
+
+ due to lost tracking; 2) map 2 delivers more coverage due to less lost
+ tracking.
+ In all maps, initial position fix were obtained at substantial time after
+ motion were commenced.
 \end_layout
 
 \begin_layout Standard
@@ -1124,6 +1347,13 @@ status open
 
 \begin_layout Plain Layout
 Localization Using Combined Maps (M1) and (M2)
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:joint-map-result"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1172,7 +1402,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-One place where loop closing failed to take place.
+A particular place where loop closing failed to take place.
  Image contrast has been adjusted to lighten dark areas.
  Notice that most ORB points (green) fell in the background cloud.
 \begin_inset CommandInset label
@@ -1259,6 +1489,62 @@ reference "fig:turning-map"
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename errors1.eps
+	lyxscale 50
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename errors2.eps
+	lyxscale 50
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename errorsj.eps
+	lyxscale 50
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Error graphs from all maps used in the experiment
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 wide false
 sideways false
@@ -1287,7 +1573,7 @@ Map
 \begin_inset Text
 
 \begin_layout Plain Layout
-Errors (in cm)
+Errors (in m)
 \end_layout
 
 \end_inset
@@ -1364,7 +1650,7 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
-8.0
+0.08
 \end_layout
 
 \end_inset
@@ -1373,7 +1659,7 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
-10.7
+0.11
 \end_layout
 
 \end_inset
@@ -1382,7 +1668,7 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
-120.8
+1.21
 \end_layout
 
 \end_inset
@@ -1402,7 +1688,7 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.5
+0.06
 \end_layout
 
 \end_inset
@@ -1411,7 +1697,7 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
-8.8
+0.09
 \end_layout
 
 \end_inset
@@ -1420,7 +1706,7 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
-166.8
+1.67
 \end_layout
 
 \end_inset
@@ -1440,7 +1726,7 @@ Joint Map
 \begin_inset Text
 
 \begin_layout Plain Layout
-6.8
+0.07
 \end_layout
 
 \end_inset
@@ -1449,7 +1735,7 @@ Joint Map
 \begin_inset Text
 
 \begin_layout Plain Layout
-9.8
+0.10
 \end_layout
 
 \end_inset
@@ -1458,7 +1744,7 @@ Joint Map
 \begin_inset Text
 
 \begin_layout Plain Layout
-160.7
+1.61
 \end_layout
 
 \end_inset
@@ -1488,60 +1774,6 @@ Errors from modified ORB-SLAM compared to ground truth
 
 \end_layout
 
-\begin_layout Subsection
-Problems
-\end_layout
-
-\begin_layout Subsubsection
-Incomplete Maps
-\end_layout
-
-\begin_layout Standard
-None of the maps are complete (i.e.
- provide keyframes that cover the whole ground truth).
-\end_layout
-
-\begin_layout Subsubsection
-Lost Tracking
-\end_layout
-
-\begin_layout Section
-Discussion
-\end_layout
-
-\begin_layout Subsection
-Possible Causes for Errors
-\end_layout
-
-\begin_layout Standard
-Most of errors at magnitude larger than 1m occur in difficult areas.
- These include:
-\end_layout
-
-\begin_layout Itemize
-Turns, including a roundabout in park area
-\end_layout
-
-\begin_layout Itemize
-Acceleration and deceleration
-\end_layout
-
-\begin_layout Subsection
-Possible Causes for Lost Tracking
-\end_layout
-
-\begin_layout Subsection
-Possible Solutions
-\end_layout
-
-\begin_layout Subsubsection
-Using Multiple Maps
-\end_layout
-
-\begin_layout Subsection
-Suggestions
-\end_layout
-
 \begin_layout Section
 Conclusions and Future Work
 \end_layout
@@ -1554,18 +1786,24 @@ This work reported our approach for localization solutions in Tsukuba Challenge.
 \end_layout
 
 \begin_layout Standard
+Contrary to original results, ORB-SLAM was unable to give excellent results
+ in dynamic environment such as Tsukuba Challenge.
+ We suspect that due to significant time between mapping and localization,
+ ORB-SLAM was unable to perform place recognition using its bag-of-words
+ method.
+ This is supported from observation that most ORB feature points fell in
+ the ground.
+\end_layout
+
+\begin_layout Standard
 Despite a good results, there are still some room for improvements that
  we can propose.
  Primarily, there must be an effort to cover the whole spectrum of localization,
- primarily when the vision-based localization fails.
+ critically when the vision-based localization fails.
  In this regard, we suggest next works to integrate other low-cost methods
  such as odometry and gyroscope solutions.
- In the field of mapping, we also suggest replacing the LIDAR to other global
- SLAM methods, such as GPS .
-\end_layout
-
-\begin_layout Section
-Bibliography
+ In the mapping, we also suggest replacing the LIDAR to other global SLAM
+ methods, such as GPS .
 \end_layout
 
 \begin_layout Standard

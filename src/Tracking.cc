@@ -1031,6 +1031,7 @@ bool Tracking::Relocalisation()
         return false;
 
     const int nKFs = vpCandidateKFs.size();
+    cout << "# Candidates: " << nKFs << endl;
 
     // We perform first an ORB matching with each candidate
     // If enough matches are found we setup a PnP solver
