@@ -100,7 +100,7 @@ Introduction
 \begin_layout Standard
 Recently, autonomous driving system and advanced driving assist system are
  actively developed.
- Google tests autonomous driving in urban environment over 150km already.
+ Google already tests autonomous driving in urban environment over 150km.
  Google uses High precision and accurate 3D LiDAR for localization and recogniti
 on.
  Such sensors are still expensive relative to other vehicle sensors such
@@ -130,6 +130,14 @@ Real-World Robot Challenge (RWRC) is real-world autonomous navigation challenge
 \end_layout
 
 \begin_layout Standard
+Despite failure of our team in reaching the goal, in the Tsukuba Challenge
+ we have gathered some valuable experience.
+ Most importantly, we have collected datasets for evaluating vision-based
+ localization methods in real world environment.
+ 
+\end_layout
+
+\begin_layout Standard
 This paper proposes positioning method using monocular camera with ORB-SLAM
  with LiDAR-aided mapping.
  ORB SLAM is one of most recent monocular vision-based SLAM method.
@@ -144,7 +152,7 @@ on problems such as robustness and map consistency problem.
 \end_layout
 
 \begin_layout Standard
-Generally, this paper discusses: 1) Benchmark tests of ORB-SLAM in Tsukuba-
+Generally, this paper discusses: 1) Benchmark tests of ORB-SLAM in Tsukuba
  challenge environments; 2) Description of ORB-SLAM with LiDAR-aided Mapping
  to solve consistency problems of multiple maps; 3) Experimental results
  and evaluation in Tsukuba-Challenge environments.
@@ -242,7 +250,7 @@ key "galvez-lopez2012bagsof"
 \end_layout
 
 \begin_layout Subsection
-Velodyne SLAM
+LIDAR-based SLAM
 \end_layout
 
 \begin_layout Standard
@@ -604,8 +612,27 @@ Any disturbances in camera vision that make it unable to view previously
 ORB-SLAM with LIDAR-aided Mapping
 \end_layout
 
+\begin_layout Standard
+Main output of ORB-SLAM mapping is a set of keyframes.
+ Our point of interest here is pose data contained in each keyframes, which
+ consists of translation and rotation: 
+\begin_inset Formula $P=(\mathbf{t},\mathbf{q})=(x,y,z,q_{x},q_{y},q_{z},q_{w})$
+\end_inset
+
+.
+ As illustrated in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:ORB-SLAM-robot-trajectory"
+
+\end_inset
+
+, we would like to get an accurate localization in metric coordinate system
+ without regard to ORB-SLAM scale problem.
+\end_layout
+
 \begin_layout Subsection
-Scale Correction in Localization
+Metric Transformation from ORB-SLAM
 \end_layout
 
 \begin_layout Standard
@@ -616,8 +643,8 @@ on of scale correction is eliminated.
  Therefore, the external reference must have high accuracy.
  In our case, we chose Velodyne-based SLAM as reference due to immediate
  availability.
- Other positioning method may also be used, such as GPS or odometry as long
- as error corrections are provided 
+ Other positioning methods may also be used, such as GPS or odometry as
+ long as error corrections are provided 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "burschka2004vgpsslam"
@@ -633,15 +660,10 @@ In the localization-only process, the system depends solely on ORB-SLAM
  Therefore, external methods such as LIDAR SLAM are not required.
  However, the system modifies position value to correct distance deformation
  according to this formula.
- Each pose variable represents translation and rotation: 
-\begin_inset Formula $P=(\mathbf{t},\mathbf{q})=(x,y,z,q_{x},q_{y},q_{z},q_{w})$
-\end_inset
-
-
 \end_layout
 
 \begin_layout Enumerate
-Take original ORB-SLAM position as 
+Take original ORB-SLAM position from localization as 
 \begin_inset Formula $P_{o}$
 \end_inset
 
@@ -653,7 +675,7 @@ Search the nearest keyframe in map from
 \begin_inset Formula $P_{o}$
 \end_inset
 
- using previous octree as 
+ as 
 \begin_inset Formula $P_{k}$
 \end_inset
 
@@ -715,6 +737,37 @@ P_{c}=P_{n}P_{r'}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Illustration of metric transformation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+External Localization Reference Using NDT Scan Matching
 \end_layout
 
 \begin_layout Standard
@@ -811,21 +864,6 @@ Using Multiple Maps
 \begin_layout Standard
 During experiments, we found that maps from same place but different time
  will deliver different results.
- These differences are visible on figures 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Using-Map-(M1)"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Using-Map-(M2)"
-
-\end_inset
-
-.
  Therefore it is logical to combine results from two maps in order to: 1)
  alternately provide localization whenever one of the maps fails; 2) reduce
  errors from all maps.
@@ -1046,6 +1084,14 @@ ce.
  done incrementally, using same location in different times.
  This is useful for example, to build lifelong map in different situation
  such as weather and day/night.
+ An example of map building is illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Partial-map"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1072,6 +1118,13 @@ status open
 
 \begin_layout Plain Layout
 Partial map being built after loading
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Partial-map"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
