@@ -130,9 +130,11 @@ Real-World Robot Challenge (RWRC) is real-world autonomous navigation challenge
 \end_layout
 
 \begin_layout Standard
-Despite failure of our team in reaching the goal, in the Tsukuba Challenge
- we have gathered some valuable experience.
- Most importantly, we have collected datasets for evaluating vision-based
+Despite failure of our team in finishing the track, we have gathered some
+ valuable experience in the Tsukuba Challenge.
+ Most importantly, we have implemented monocular vision-based localization
+ based on ORB-SLAM.
+ In the process, we also collected datasets for evaluating vision-based
  localization methods in real world environment.
  
 \end_layout
@@ -140,7 +142,7 @@ Despite failure of our team in reaching the goal, in the Tsukuba Challenge
 \begin_layout Standard
 This paper proposes positioning method using monocular camera with ORB-SLAM
  with LiDAR-aided mapping.
- ORB SLAM is one of most recent monocular vision-based SLAM method.
+ ORB-SLAM is one of most recent monocular vision-based SLAM method.
  This method estimates position and map from image sequence in real-time.
  Originally, ORB-SLAM is designed to solve SLAM problem.
  However, required performance of localization problem is different from
@@ -337,6 +339,7 @@ In order to provide multiple time localization, our implementation of ORB-SLAM
  data saved previously by mapping process.
  Next, localization-only proceeds similar with mapping.
  However, map modification is disabled in relocalization process.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -350,6 +353,14 @@ The ORB-SLAM main process creates an environmental map which consists of
  2D feature points.
  The whole ORB-SLAM process consists of three parallel threads: tracking,
  local mapping and loop closing.
+ Relations between these processes are illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Flowchart-of-ORB-SLAM"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection
@@ -484,6 +495,36 @@ key "galvez-lopez2012bagsof"
  errors by moving the candidate and its connected keyframes.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Flowchart of ORB-SLAM
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Flowchart-of-ORB-SLAM"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Problems in ORB-SLAM
 \end_layout
@@ -493,8 +534,8 @@ Scale Problem
 \end_layout
 
 \begin_layout Standard
-ORB-SLAM emits localization results in its own coordinate system, that are
- not free from distortion.
+ORB-SLAM emits localization results based on maps in its own coordinate
+ system (and not metrically correct), that are not free from distortion.
  This problem is inherent in almost all vision-based localization methods.
  In some occasion, result maps may suffer heavy deformation, as illustrated
  in figure 
@@ -614,21 +655,56 @@ ORB-SLAM with LIDAR-aided Mapping
 
 \begin_layout Standard
 Main output of ORB-SLAM mapping is a set of keyframes.
- Our point of interest here is pose data contained in each keyframes, which
- consists of translation and rotation: 
-\begin_inset Formula $P=(\mathbf{t},\mathbf{q})=(x,y,z,q_{x},q_{y},q_{z},q_{w})$
-\end_inset
-
-.
- As illustrated in 
+ As explained above, our main goal is to take this map and compute localization
+ during robot runs as guidance for navigation system, be it a robot or an
+ autonomous car.
+ Therefore it is necessary to get localization results that are metrically
+ acurate.
+ However as illustrated in 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:ORB-SLAM-robot-trajectory"
 
 \end_inset
 
-, we would like to get an accurate localization in metric coordinate system
- without regard to ORB-SLAM scale problem.
+, it would be very difficult to get accurate position using deformed maps
+ from ORB-SLAM.
+\end_layout
+
+\begin_layout Standard
+To formalize the map and localization process, we state the following notation.
+ An ORB-SLAM map is a set of pose
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+There are other important data, but not our concern yet.
+\end_layout
+
+\end_inset
+
+: 
+\begin_inset Formula $M=\left\{ P_{i}|0\leq i<N-1\right\} $
+\end_inset
+
+, where 
+\begin_inset Formula $N$
+\end_inset
+
+ is the number of keyframes until mapping process is stopped.
+ Each pose 
+\begin_inset Formula $P$
+\end_inset
+
+ consists of translation and rotation (in quaternion) in 3D, so 
+\begin_inset Formula $P$
+\end_inset
+
+ is a vector of seven elements: 
+\begin_inset Formula $P=(\mathbf{t},\mathbf{q})=(x,y,z,q_{x},q_{y},q_{z},q_{w})$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -744,10 +820,6 @@ P_{c}=P_{n}P_{r'}
 wide false
 sideways false
 status open
-
-\begin_layout Plain Layout
-
-\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -993,6 +1065,14 @@ Our robot is derived from Segway RMP-200 platform, using Grasshopper3 camera
  In the course of run, robot may often encounter dynamic obstacles such
  as human or bycicle, which necessitated action by operator to either stop
  or maneuver the robot motion.
+ Our robot setup is shown in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Robot-Setup"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1011,9 +1091,9 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename robot view.jpg
+	filename robot view.eps
 	lyxscale 30
-	width 70col%
+	width 80col%
 
 \end_inset
 
@@ -1025,6 +1105,13 @@ status open
 
 \begin_layout Plain Layout
 Robot for evaluation
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Robot-Setup"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
