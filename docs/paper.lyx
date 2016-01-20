@@ -27,6 +27,7 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
+\float_placement h
 \paperfontsize 10
 \spacing single
 \use_hyperref false
@@ -68,7 +69,7 @@
 
 \begin_layout Title
 Monocular Vision-based Localization using ORB-SLAM with LIDAR-aided Mapping
- in Tsukuba Challenge
+ in Real-World Robot Challenge
 \end_layout
 
 \begin_layout Author
@@ -96,45 +97,60 @@ Keyword: Visual Localization, Autonomous Vehicle, Field Robotics, Tsukuba
 Introduction
 \end_layout
 
-\begin_layout Subsection
-Background
-\end_layout
-
 \begin_layout Standard
-The importance of vision-based localization can not be overstated.
- In applications like autonomous vehicle, this localization method will
- significantly reduce cost for manufacturer, which previously must use LIDAR-bas
-ed solutions.
- However, vision-based methods are usually avoided due to inaccuracy when
- compared to LIDAR-based methods, in addition to lack of metrically correctness.
-\end_layout
-
-\begin_layout Standard
-To the best of our knowledge, it is the first implementation of monocular
- vision-based localization in Tsukuba Challenge.
- Previous methods for localization usually employs LIDAR-based methods,
- either 2D or 3D.
-\end_layout
-
-\begin_layout Standard
-Our primary reason for choosing ORB-SLAM is related in our work in autonomous
- vehicles, which requires localization methods using monocular camera and
- provides capability for lifelong mapping.
+Recently, autonomous driving system and advanced driving assist system are
+ actively developed.
+ Google tests autonomous driving in urban environment over 150km already.
+ Google uses High precision and accurate 3D LiDAR for localization and recogniti
+on.
+ Such sensors are still expensive relative to other vehicle sensors such
+ as camera and millimeter wave range sensor.
+ On the other hand, high precision environment digital maps are active research
+ areas within autonomous driving systems.
+ An example is Mobile Mapping Systems (MMS), which is capable to measure
+ accurate 3D point cloud maps by driving on urban road.
+ Such 3D maps are basic technology of recent autonomous vehicles.
  
 \end_layout
 
 \begin_layout Standard
-Our challenge ...
-\end_layout
-
-\begin_layout Subsection
-Objectives
+Real-World Robot Challenge (RWRC) is real-world autonomous navigation challenge
+ in City of Tsukuba, Japan.
+ The robots need to run over 1km route autonomously.
+ One of important techniques to realize autonomous navigation is localization.
+ The robots need to keep position accuracy over the course with various
+ environment changes such as dynamic obstacles, illumination change, season
+ changes and others.
+ Most teams in Tsukuba Challenge use sensor fusion approach using LiDAR,
+ gyro-scope, and odometer.
+ Such sensor fusion techniques can compensate weakness of sensor characteristics.
+ On the other hand, vision-based approach is not actively used in RWRC.
+ In short, objective of this research is to find problems and solutions
+ of monocular camera based localization in real-world.
 \end_layout
 
 \begin_layout Standard
-In the Tsukuba Challenge, we would like to evaluate effectiveness of ORB-SLAM
- and compare the localization results against LIDAR-based method as ground
- truth.
+This paper proposes positioning method using monocular camera with ORB-SLAM
+ with LiDAR-aided mapping.
+ ORB SLAM is one of most recent monocular vision-based SLAM method.
+ This method estimates position and map from image sequence in real-time.
+ Originally, ORB-SLAM is designed to solve SLAM problem.
+ However, required performance of localization problem is different from
+ SLAM problem; therefore, the method has several problems in adopting localizati
+on problems such as robustness and map consistency problem.
+ The proposed method has two key points: (1) to estimate metric position
+ by using ORB-SLAM with LiDAR-aided mapping, and (2) to solve robustness
+ problem using consistent multiple maps.
+\end_layout
+
+\begin_layout Standard
+Generally, this paper discusses: 1) Benchmark tests of ORB-SLAM in Tsukuba-
+ challenge environments; 2) Description of ORB-SLAM with LiDAR-aided Mapping
+ to solve consistency problems of multiple maps; 3) Experimental results
+ and evaluation in Tsukuba-Challenge environments.
+ Finally, this paper illustrates capability of vision-based localization
+ method with multiple maps to estimate almost similar path with LiDAR base
+ localization results over almost course.
 \end_layout
 
 \begin_layout Section
@@ -142,7 +158,39 @@ Related Works
 \end_layout
 
 \begin_layout Subsection
-Monocular SLAM
+Monocular Vision-Based SLAM
+\end_layout
+
+\begin_layout Standard
+All monocular SLAM methods are based on 3D reconstruction from multiple
+ view of scenes 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "fuentes-pacheco2015visualsimultaneous"
+
+\end_inset
+
+, which in turn is based on Structure from Motion.
+ As stated in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "szeliski1997shapeambiguities"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lourakis2013accurate"
+
+\end_inset
+
+, all monocular structure from motion methods inherit common scale ambiguities,
+ which consists in the fact that the recovered 3D structures and camera
+ motion are defined up to an unknown scale factor which cannot be determined
+ from image streams alone.
+ This is because if the scene and camera are scaled together, this change
+ will be indistinguishable in the captured images.
 \end_layout
 
 \begin_layout Standard
@@ -163,10 +211,7 @@ key "engel2014lsdslam"
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-ORB-SLAM itself was described in 
+ ORB-SLAM itself was described in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "mur-artal2015orbslam"
@@ -175,57 +220,25 @@ key "mur-artal2015orbslam"
 
 .
  Of particular note, the ORB-SLAM uses ORB (Oriented FAST, Rotated BRIEF)
- as main feature detector, and bag-of-words method as place recognition.
- Contrary to previous methods, ORB-SLAM generates relatively sparse maps
- due to us of extracted feature points rather than whole scenes.
- This gives potentially smaller maps and faster processing time.
-\end_layout
-
-\begin_layout Standard
-All monocular SLAM methods are based on 3D reconstruction from multiple
- view of scenes 
+ as main feature detector 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "fuentes-pacheco2015visualsimultaneous"
+key "rublee2011orban"
 
 \end_inset
 
-, which in turn are based on Structure from Motion.
- As stated in 
+, and bag-of-words method as place recognition 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "szeliski1997shapeambiguities"
-
-\end_inset
-
- and 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "lourakis2013accurate"
-
-\end_inset
-
-, all monocular structure from motion methods inherit common scale ambiguities,
- which consists in the fact that the recovered 3D structures and camera
- motion are defined up to an unknown scale factor which cannot be determined
- from image streams alone.
- This is because if the scene and camera are scaled together, this change
- will not be indistinguishable in the captured images.
-\end_layout
-
-\begin_layout Standard
-Another effort for LIDAR-assisted mapping with visual localization is works
- of Wolcott in 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "wolcott2014visuallocalization"
+key "galvez-lopez2012bagsof"
 
 \end_inset
 
 .
- Here, frames from camera is directly compared with synthetic images rendered
- from LIDAR-based maps, thus creating indirect image-to-image matches using
- Mutual Information as basis for scoring.
+ Contrary to previous methods that examine the whole scene and generate
+ dense maps, ORB-SLAM generates relatively sparse maps due to use of extracted
+ feature points.
+ This gives ORB-SLAM potentially smaller maps and faster processing time.
 \end_layout
 
 \begin_layout Subsection
@@ -233,7 +246,7 @@ Velodyne SLAM
 \end_layout
 
 \begin_layout Standard
-Velodyne-based SLAM is explained in 
+LIDAR-based SLAM is explained in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "moosmann2011velodyne"
@@ -243,6 +256,14 @@ key "moosmann2011velodyne"
 .
  This SLAM method is popular for autonomous vehicle applications, and is
  capable to provide accurate maps andlocalization.
+ Of particular note, this localization method is used in Autoware 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "kato2015anopen"
+
+\end_inset
+
+ as real-world application of autonomous vehicle platform.
 \end_layout
 
 \begin_layout Standard
@@ -251,12 +272,48 @@ Velodyne-based SLAM takes 3D laser scans as input, and compose the map using
  distribution transform 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "biber2003thenormal"
+key "takeuchi2006a3d"
 
 \end_inset
 
 ).
+\end_layout
+
+\begin_layout Subsection
+Tsukuba Challenge
+\end_layout
+
+\begin_layout Standard
+In most of the course of Tsukuba Challenge, almost all teams use LIDAR-based
+ localization method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "morales2009autonomous"
+
+\end_inset
+
+.
+ These methods use sensor fusion approach with LIDAR and odometer.
+ One of the important technique is to use good dead reckoning method such
+ as calibrated gyroscope.
  
+\end_layout
+
+\begin_layout Standard
+There had been some trials of monocular vision-based localization in RWRC.
+ One of the those efforts is 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ohshima2008teachingplayback"
+
+\end_inset
+
+; this method is basically topological SLAM, by following image sequence
+ and estimate pose using feature points.
+ Comparing with the above methods, our method tries to get metrically correct
+ positioning, similar to LIDAR-based navigation but using monocular camera.
+ This method is familiar to sensor fusion with other metric localization
+ method such as LiDAR, GNSS, and dead reckoning methods.
 \end_layout
 
 \begin_layout Section
@@ -500,7 +557,9 @@ reference "fig:ORB-SLAM-robot-trajectory"
  time).
  By zooming-in parts in red square, it is revealed that most later keyframes
  clump in a small area of the ORB-SLAM map.
- By comparing (1) and (4), clearly ...
+ Applying point distances acquired from ground truth, we get a trajectory
+ that is closer to ground truth (5) but still has wrong shape.
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -786,8 +845,8 @@ Evaluation in Tsukuba Challenge Environment
 \end_layout
 
 \begin_layout Standard
-We performed three runs of robot by tracing the trajectory mandated by Tsukuba
- Challenge committee.
+We performed four runs of robot by traversing the trajectory mandated by
+ Tsukuba Challenge committee.
  In each run, we recorded camera images and performed localization using
  Velodyne LIDAR using two different computers due to high computational
  requirement.
@@ -806,7 +865,18 @@ Two runs were chosen as material for mapping with consideration that those
  runs spanned longest runs without any vision occlusion.
  However, in both run path loop were not executed.
  Therefore, we were not able to evaluate loop closing capability of ORB-SLAM.
- Next, we performed localization test in two runs using both maps.
+ First mapping run was conducted at 6th November 13:44, at which weather
+ condition was clear with few obstacles in the path.
+ Second mapping was at 7th November 11:30, during which weather condition
+ was cloudy and few people along the path.
+\end_layout
+
+\begin_layout Standard
+Runs for 
+\end_layout
+
+\begin_layout Standard
+Next, we performed localization test in two runs using both maps.
 \end_layout
 
 \begin_layout Standard
@@ -973,7 +1043,7 @@ Map Saving and Restoration
 In our experience, map saving and restoration does not affect ORB-SLAM performan
 ce.
  In addition, the system gains useful capability: map building can now be
- done incrementally, using same location in different time.
+ done incrementally, using same location in different times.
  This is useful for example, to build lifelong map in different situation
  such as weather and day/night.
 \end_layout
@@ -1179,7 +1249,7 @@ reference "fig:lost-tracking"
  depicts a situation when the robot performed violent rotation and about
  to lost tracking.
  Note the absence of ORB feature points in the right portion of image frame.
- At right, the axis shows that robot is in right track, but robot is oriented
+ At right, the axis shows that robot was in right track, but robot is oriented
  to a place without map points.
  The blue axis represents front.
 \end_layout
