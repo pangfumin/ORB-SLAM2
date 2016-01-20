@@ -283,17 +283,8 @@ The ORB-SLAM main process creates an environmental map which consists of
  keyframes and map points.
  Each keyframe stores its position in ORB-SLAM coordinate and a list of
  2D feature points.
- These feature points are computed from ORB feature points in tracking subproces
-s.
- 
-\end_layout
-
-\begin_layout Standard
-The whole ORB-SLAM process consists of three parallel threads: tracking,
+ The whole ORB-SLAM process consists of three parallel threads: tracking,
  local mapping and loop closing.
- The tracking is responsible to localize the camera with every frame, and
- decides when to insert a new keyframe.
- 
 \end_layout
 
 \begin_layout Subsubsection
@@ -346,9 +337,8 @@ key "faugeras1988motionand"
 .
  When this stage is succesful, the system will have an initial set of keyframes
  and map points for which tracking may proceed.
- However, sometimes tracking fails shortly after initial map is built.
- When this is the case, initial map is deleted and initialization process
- will start over.
+ However, tracking may fail shortly after initial map is built; when this
+ happens the initial map is reset and started over.
 \end_layout
 
 \begin_layout Subsubsection
@@ -560,10 +550,6 @@ Scale Correction in Localization
 \end_layout
 
 \begin_layout Standard
-State our motivation for using velodyne
-\end_layout
-
-\begin_layout Standard
 Scale problem can be solved if distance of two particular points in ORB-SLAM
  coordinate is known based on external reference.
  In longer run, this association must be done correctly so that error accumulati
@@ -645,14 +631,18 @@ s=\frac{\left\Vert \mathbf{t}_{n'}-\mathbf{t}_{n}\right\Vert }{\left\Vert \mathb
 \end_layout
 
 \begin_layout Enumerate
-Apply distance scale to correct current position 
-\begin_inset Formula $P_{r}=P_{o'}^{-1}P_{o}$
-\end_inset
-
- :
+Apply distance scale to correct current position :
 \begin_inset Formula 
 \[
-P_{r'}=(st_{r},q_{r})
+P_{r}=P_{o'}^{-1}P_{o}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+P_{r'}=(s\mathbf{t}_{r},\mathbf{q}_{r})
 \]
 
 \end_inset
@@ -1522,7 +1512,7 @@ reference "fig:turning-map"
  depicts a turning situation continued by straight path.
  In the turning, modified ORB-SLAM shows deviations compared to ground truth,
  while straight path has less deviation.
- It is also clear that different maps give different results, despite running
+ It is also clear that each maps give different results, despite running
  in the exact same path and time.
 \end_layout
 
