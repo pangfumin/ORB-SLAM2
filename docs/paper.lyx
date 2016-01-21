@@ -122,7 +122,7 @@ Real-World Robot Challenge (RWRC) is real-world autonomous navigation challenge
  environment changes such as dynamic obstacles, illumination change, season
  changes and others.
  Most teams in Tsukuba Challenge use sensor fusion approach using LiDAR,
- gyro-scope, and odometer.
+ gyroscope, and odometer.
  Such sensor fusion techniques can compensate weakness of sensor characteristics.
  On the other hand, vision-based approach is not actively used in RWRC.
  In short, objective of this research is to find problems and solutions
@@ -265,7 +265,7 @@ key "moosmann2011velodyne"
 
 .
  This SLAM method is popular for autonomous vehicle applications, and is
- capable to provide accurate maps andlocalization.
+ capable to provide accurate maps and localization.
  Of particular note, this localization method is used in Autoware 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -381,10 +381,7 @@ key "rublee2011orban"
  This detector has advantages such as faster computation and lower storage
  requirement (each descriptor only needs 32 bytes), in addition to resistance
  against rotation and noise.
- By default, number of extracted ORB points is fixed at 1000.
- However, we found that increasing this number up to 2500 gives many benefits,
- including faster map initialization and resistance against image flaws
- such as partial occlusion and lens flares.
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -502,10 +499,21 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename orb-slam overview.eps
+	width 95col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Flowchart of ORB-SLAM
+ORB-SLAM System Overview
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:Flowchart-of-ORB-SLAM"
@@ -535,8 +543,17 @@ Scale Problem
 
 \begin_layout Standard
 ORB-SLAM emits localization results based on maps in its own coordinate
- system (and not metrically correct), that are not free from distortion.
- This problem is inherent in almost all vision-based localization methods.
+ system (and not metrically correct), that are not free from distortion
+ due to scale ambiguities.
+ This problem is inherent in almost all vision-based localization methods
+ or even all 3D reconstruction method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hartley2003multiple"
+
+\end_inset
+
+.
  In some occasion, result maps may suffer heavy deformation, as illustrated
  in figure 
 \begin_inset CommandInset ref
@@ -735,6 +752,14 @@ In the localization process, the system depends solely on ORB-SLAM method.
  Therefore, external methods such as LIDAR SLAM are not required.
  However, the system modifies position value to correct distance deformation
  according to this formula.
+ This transformation is illustrated in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:metric-convertion"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Enumerate
@@ -787,7 +812,11 @@ s=\frac{\left\Vert \mathbf{t}_{n'}-\mathbf{t}_{n}\right\Vert }{\left\Vert \mathb
 \end_layout
 
 \begin_layout Enumerate
-Apply distance scale to correct current position :
+Apply distance scale to correct current position as 
+\begin_inset Formula $P_{c}$
+\end_inset
+
+ :
 \begin_inset Formula 
 \[
 P_{r}=P_{o'}^{-1}P_{o}
@@ -821,10 +850,29 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename metric_convertion.eps
+	lyxscale 60
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Caption
 
 \begin_layout Plain Layout
 Illustration of metric transformation
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:metric-convertion"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -970,14 +1018,14 @@ Two runs were chosen as material for mapping with consideration that those
  condition was clear with few obstacles in the path.
  Second mapping was at 7th November 11:30, during which weather condition
  was cloudy and few people along the path.
-\end_layout
-
-\begin_layout Standard
-Runs for 
-\end_layout
-
-\begin_layout Standard
-Next, we performed localization test in two runs using both maps.
+ For testing runs, we chose first run at 3rd November 15:00; this day was
+ a holiday with many people along the track, the weather was very clear
+ with strong lighting contrast between sky and ground.
+ Second testing run was from 7th November 14:20; there were only a few pedestria
+ns and many other robot teams but very soft contrast.
+ For all mapping and running runs, there were a few occasion of heavy flares
+ when the camera faced to the sun, while the tracks were covered by falling
+ leaves.
 \end_layout
 
 \begin_layout Standard
@@ -1068,8 +1116,37 @@ reference "fig:Robot-Setup"
 
 \begin_layout Standard
 Our track in Tsukuba Challenge was vastly different from original ORB-SLAM
- paper evaluation.
- 
+ paper evaluation, which used New College dataset.
+ The figures below show typical scenarios which may be found during Tsukuba
+ Challenge.
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Starting-Point"
+
+\end_inset
+
+, the starting point featured paveblock tracks, trees and building in far
+ background.
+ Most areas are pedestrian tracks with thick cover from trees and falling
+ leaves in the ground (figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Pedestrian"
+
+\end_inset
+
+).
+ There were also many areas with strong contrast, as in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Strong-contrast"
+
+\end_inset
+
+.
+ This situation may confuse automatic exposure system of cameras, and makes
+ it difficult to detect feature points.
 \end_layout
 
 \begin_layout Standard
@@ -1084,7 +1161,7 @@ status open
 \begin_inset Graphics
 	filename robot view.eps
 	lyxscale 30
-	width 80col%
+	width 100col%
 
 \end_inset
 
@@ -1139,6 +1216,98 @@ status open
 
 \begin_layout Plain Layout
 Starting Point
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Starting-Point"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename pedestrians.eps
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Typical situation in Tsukuba Challenge: pedestrian tracks covered in falling
+ leaves
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Pedestrian"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename strong contrast.jpg
+	lyxscale 50
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Lighting situation featured many areas with strong contrast due to shadow
+ cast
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Strong-contrast"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1158,8 +1327,8 @@ Map Saving and Restoration
 \begin_layout Standard
 In our experience, map saving and restoration does not affect ORB-SLAM performan
 ce.
- In addition, the system gains useful capability: map building can now be
- done incrementally, using same location in different times.
+ In fact, the system gains useful capability: map building can now be done
+ incrementally, using same location in different times.
  This is useful for example, to build lifelong map in different situation
  such as weather and day/night.
  An example of map building is illustrated in figure 
@@ -1238,6 +1407,12 @@ To get initial position fix, ORB-SLAM performs keyframe search based on
 Map initialization is also another problem.
  During experiment, we found that initialization will succeed (and not getting
  false initialization) whenever robot is moved, either rotation or translation.
+ In our experiences, false map initialization and slow position fix can
+ be solved by increasing number of extracted ORB points (by default this
+ is 1000) to 2500.
+ The drawback is higher computation times per frame.
+ However, other benefits from increasing this number are better resistance
+ against lens flares and partial occlusion.
 \end_layout
 
 \begin_layout Subsection
@@ -1680,8 +1855,8 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Visual comparison of Modified ORB-SLAM trajectory against ground truth (blue
- curve).
+Example of visual comparison of Modified ORB-SLAM trajectory against ground
+ truth (blue curve).
  Map 1 result is depicted in green, while map 2 in red.
 \begin_inset CommandInset label
 LatexCommand label
