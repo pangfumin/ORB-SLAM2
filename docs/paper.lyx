@@ -731,8 +731,7 @@ key "burschka2004vgpsslam"
 \end_layout
 
 \begin_layout Standard
-In the localization-only process, the system depends solely on ORB-SLAM
- method.
+In the localization process, the system depends solely on ORB-SLAM method.
  Therefore, external methods such as LIDAR SLAM are not required.
  However, the system modifies position value to correct distance deformation
  according to this formula.
@@ -939,15 +938,7 @@ During experiments, we found that maps from same place but different time
  Therefore it is logical to combine results from two maps in order to: 1)
  alternately provide localization whenever one of the maps fails; 2) reduce
  errors from all maps.
-\end_layout
-
-\begin_layout Standard
-Our approach in fusing results from multiple maps is by averaging position
- data from each map.
- This process is performed each time any map (that runs in their own tracking
- threads) emits position data.
- A map is marked as fail when it does not emit position after a determined
- time interval.
+ In this regard, any method for sensor fusion may be used.
 \end_layout
 
 \begin_layout Section
