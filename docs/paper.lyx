@@ -130,7 +130,7 @@ Real-World Robot Challenge (RWRC) is real-world autonomous navigation challenge
 \end_layout
 
 \begin_layout Standard
-Despite failure of our team in finishing the track, we have gathered some
+Despite inability of our team in finishing the track, we have gathered some
  valuable experience in the Tsukuba Challenge.
  Most importantly, we have implemented monocular vision-based localization
  based on ORB-SLAM.
@@ -154,7 +154,7 @@ on problems such as robustness and map consistency problem.
 \end_layout
 
 \begin_layout Standard
-Generally, this paper discusses: 1) Benchmark tests of ORB-SLAM in Tsukuba
+In general, this paper discusses: 1) Benchmark tests of ORB-SLAM in Tsukuba
  challenge environments; 2) Description of ORB-SLAM with LiDAR-aided Mapping
  to solve consistency problems of multiple maps; 3) Experimental results
  and evaluation in Tsukuba-Challenge environments.
@@ -567,7 +567,6 @@ reference "fig:ORB-SLAM-robot-trajectory"
 
 \begin_layout Standard
 \begin_inset Float figure
-placement H
 wide false
 sideways false
 status open
@@ -635,8 +634,8 @@ Lack of Support for Lifelong Mapping
 \begin_layout Standard
 Original design for ORB-SLAM is single run for both localization and mapping,
  and there is not any features to store in-memory map.
- However, it is desirable that mapping can be done multiple times with same
- path, so map saving and restoration is essential.
+ However, it is desirable that mapping and localization can be done multiple
+ times with same path, so map saving and restoration is essential.
  This feature is also useful for improving map robustness in changing condition
  
 \begin_inset CommandInset citation
@@ -649,7 +648,7 @@ key "konolige2009towards"
 \end_layout
 
 \begin_layout Subsubsection
-Sudden Vision Occlusion
+Visual Disturbances
 \end_layout
 
 \begin_layout Standard
@@ -664,6 +663,13 @@ Any disturbances in camera vision that make it unable to view previously
  the robot never reverses motion, and contrary to described behaviour in
  original paper of ORB-SLAM.
  Our solution is to force relocalization by searching all keyframes in database.
+\end_layout
+
+\begin_layout Standard
+Other forms of visual disturbances is lens flare, which happens when camera
+ is faced to the sun.
+ The effects range from lost tracking to straying positions, which may affect
+ usability of the ORB-SLAM.
 \end_layout
 
 \begin_layout Section
@@ -886,7 +892,7 @@ name "fig:metric-convertion"
 \end_layout
 
 \begin_layout Subsection
-External Localization Reference Using NDT Scan Matching
+External Mapping Reference Using NDT Scan Matching
 \end_layout
 
 \begin_layout Standard
@@ -1011,20 +1017,348 @@ We performed four runs of robot by traversing the trajectory mandated by
 \begin_layout Standard
 Two runs were chosen as material for mapping with consideration that those
  runs spanned longest runs without any vision occlusion.
- However, in both run path loop were not executed.
- Therefore, we were not able to evaluate loop closing capability of ORB-SLAM.
- First mapping run was conducted at 6th November 13:44, at which weather
- condition was clear with few obstacles in the path.
- Second mapping was at 7th November 11:30, during which weather condition
- was cloudy and few people along the path.
- For testing runs, we chose first run at 3rd November 15:00; this day was
- a holiday with many people along the track, the weather was very clear
- with strong lighting contrast between sky and ground.
- Second testing run was from 7th November 14:20; there were only a few pedestria
-ns and many other robot teams but very soft contrast.
- For all mapping and running runs, there were a few occasion of heavy flares
- when the camera faced to the sun, while the tracks were covered by falling
- leaves.
+ Weather conditions and lighting condition varied slightly for all runs.
+ However, there were a few occasion of heavy flares when the camera faced
+ to the sun, with the tracks were covered by falling leaves.
+ Map and test run conditions are listed in table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Time-and-condition"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="5">
+<features tabularvalignment="middle" tabularwidth="100col%">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="23col%">
+<column alignment="center" valignment="top" width="15col%">
+<column alignment="center" valignment="top" width="15col%">
+<column alignment="center" valignment="top" width="15col%">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Runs
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Date & Time (November 2015)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Weather Condition
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Lighting Contrast
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Human Presence
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Map 1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+6th, 13:44
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Clear, few low clouds
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+High
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Low
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Map 2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+7th, 11:30
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Cloudy
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Medium
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Low
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Test 1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+3rd, 14:55
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Clear
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+High
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+High
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Test 2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+7th, 14:20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Cloudy
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Low
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Low
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Time and condition for mapping and testing runs
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Time-and-condition"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1411,7 +1745,7 @@ Map initialization is also another problem.
  is 1000) to 2500.
  The drawback is higher computation times per frame.
  However, other benefits from increasing this number are better resistance
- against lens flares and partial occlusion.
+ against visual disturbances.
 \end_layout
 
 \begin_layout Subsection
@@ -1602,6 +1936,26 @@ name "fig:lost-tracking"
 \end_layout
 
 \begin_layout Standard
+In both testing runs, each map delivered different performance when regarding
+ track coverage.
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Coverage-for-Test-Run-1"
+
+\end_inset
+
+, both maps are essentially complementary to cover tracking for the whole
+ track.
+ However, there are still areas where ORB-SLAM lost tracks using both maps.
+ This is evident when using multiple maps.
+ Also notable is some stray points in trajectory from map 1; these points
+ were traced to instances of lens flares due to camera facing north west
+ in time of low sun.
+ When using multiple maps, these stray points is suppressed.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide true
 sideways false
@@ -1623,6 +1977,13 @@ status open
 
 \begin_layout Plain Layout
 Coverage for Test Run 1
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Coverage-for-Test-Run-1"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
