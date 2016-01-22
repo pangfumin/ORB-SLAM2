@@ -964,12 +964,11 @@ Octree of keyframe position in ORB-SLAM coordinate.
 \end_layout
 
 \begin_layout Standard
-By default, ORB-SLAM will try to find position against last keyframe when
- it ever get lost.
- However, it is impractical after map restoration, because last keyframe
- is unknown.
- Instead, we modify ORB-SLAM to force it finding the most appropriate keyframe
- using bag-of-word method.
+By default, ORB-SLAM will try to find position against last keyframe whenever
+ it lost tracking.
+ However, for situations after map restoration, last keyframe is unknown.
+ Instead, we modify ORB-SLAM to force it to search the most appropriate
+ keyframe using bag-of-word method.
  Keyframe search is also applied when the system lost tracking, to ensure
  that the system always get the keyframe as basis for relocalization.
  The drawback is that keyframe search using bag-of-word is slower than tracking
@@ -1299,7 +1298,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Lighting situation featured many areas with strong contrast due to shadow
+Lighting situation featured many areas with strong contrasts due to shadow
  cast
 \begin_inset CommandInset label
 LatexCommand label
@@ -1416,7 +1415,7 @@ Map initialization is also another problem.
 \end_layout
 
 \begin_layout Subsection
-Tracking and Relocalization
+Relocalization and Tracking
 \end_layout
 
 \begin_layout Standard
@@ -1603,57 +1602,16 @@ name "fig:lost-tracking"
 \end_layout
 
 \begin_layout Standard
-Figures 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Using-Map-(M1)"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Using-Map-(M2)"
-
-\end_inset
-
- show the results from using map 1 and 2.
- Next figure (
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:joint-map-result"
-
-\end_inset
-
-) shows result using two maps.
- The differences of using both maps are: 1) map 1 is quicker in obtaining
- initial fix but has larger 
-\begin_inset Quotes eld
-\end_inset
-
-blank spot
-\begin_inset Quotes erd
-\end_inset
-
- due to lost tracking; 2) map 2 delivers more coverage due to less lost
- tracking.
- In all maps, initial position fix were obtained at substantial time after
- motion were commenced.
-\end_layout
-
-\begin_layout Standard
 \begin_inset Float figure
-placement H
-wide false
+wide true
 sideways false
 status open
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename orb-1.svg
-	lyxscale 40
-	width 100col%
+	filename Test Run 1.eps
+	width 100text%
 
 \end_inset
 
@@ -1664,14 +1622,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Using Map (M1)
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Using-Map-(M1)"
-
-\end_inset
-
-
+Coverage for Test Run 1
 \end_layout
 
 \end_inset
@@ -1686,93 +1637,6 @@ name "fig:Using-Map-(M1)"
 
 \begin_layout Standard
 \begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename orb-2.svg
-	lyxscale 40
-	width 100col%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Using Map (M2)
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Using-Map-(M2)"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename jointmap_result.svg
-	lyxscale 90
-	width 100col%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Localization Using Combined Maps (M1) and (M2)
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:joint-map-result"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement t
 wide true
 sideways false
 status open
