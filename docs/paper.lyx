@@ -1953,19 +1953,28 @@ reference "fig:Coverage-for-Test-Run-1"
  were traced to instances of lens flares due to camera facing north west
  in time of low sun.
  When using multiple maps, these stray points is suppressed.
+ In test run 2 as depicted in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Coverage-for-Test-Run-2"
+
+\end_inset
+
+, both maps also delivered complementary coverage.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
-wide true
+wide false
 sideways false
 status open
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename Test Run 1.eps
-	width 100text%
+	filename ndt-map-3.eps
+	lyxscale 80
+	width 100col%
 
 \end_inset
 
@@ -1998,7 +2007,7 @@ name "fig:Coverage-for-Test-Run-1"
 
 \begin_layout Standard
 \begin_inset Float figure
-wide true
+wide false
 sideways false
 status open
 
@@ -2007,7 +2016,7 @@ status open
 \begin_inset Graphics
 	filename Coverage Testing Run 2.eps
 	lyxscale 70
-	width 100text%
+	width 100col%
 
 \end_inset
 
@@ -2019,6 +2028,13 @@ status open
 
 \begin_layout Plain Layout
 Coverage for Test Run 2
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Coverage-for-Test-Run-2"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
