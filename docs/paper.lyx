@@ -7,6 +7,9 @@
 \usepackage{hyperref}
 \end_preamble
 \use_default_options true
+\begin_modules
+customHeadersFooters
+\end_modules
 \maintain_unincluded_children false
 \language english
 \language_package default
@@ -57,7 +60,7 @@
 \quotes_language english
 \papercolumns 2
 \papersides 1
-\paperpagestyle default
+\paperpagestyle fancy
 \tracking_changes false
 \output_changes false
 \html_math_output 0
@@ -91,6 +94,10 @@ In 2015 Tsukuba Challenge, we have realized an implementation of vision-based
 \begin_layout Abstract
 Keyword: Visual Localization, Autonomous Vehicle, Field Robotics, Tsukuba
  Challenge
+\end_layout
+
+\begin_layout Left Footer
+Journal of Robotics and Mechatronics
 \end_layout
 
 \begin_layout Section
@@ -661,7 +668,7 @@ Visual Disturbances
 
 \begin_layout Standard
 Any disturbances in camera vision that make it unable to view previously
- tracked feature points may cause ORB-SLAM to lost tracking.
+ tracked feature points may cause ORB-SLAM to lose tracking.
  These disturbances include vision occlusion on behalf of camera and sudden
  rotation of the robot.
  The default behaviour of ORB-SLAM to reacquire tracking after lost event
@@ -1021,11 +1028,11 @@ Octree of keyframe position in ORB-SLAM coordinate.
 
 \begin_layout Standard
 By default, ORB-SLAM will try to find position against last keyframe whenever
- it lost tracking.
+ it loses tracking.
  However, for situations after map restoration, last keyframe is unknown.
  Instead, we modify ORB-SLAM to force it to search the most appropriate
  keyframe using bag-of-word method.
- Keyframe search is also applied when the system lost tracking, to ensure
+ Keyframe search is also applied when the system loses tracking, to ensure
  that the system always get the keyframe as basis for relocalization.
  The drawback is that keyframe search using bag-of-word is slower than tracking
  using last keyframe.
@@ -1412,7 +1419,8 @@ name "tab:Time-and-condition"
 \end_layout
 
 \begin_layout Standard
-The map trajectory created by ORB-SLAM that we use is drawn in figure 
+The map trajectories created by ORB-SLAM that we use are drawn in figure
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:ORB-SLAM-robot-trajectory"
@@ -1943,10 +1951,10 @@ reference "fig:lost-tracking"
 \end_inset
 
  depicts a situation when the robot performed violent rotation and about
- to lost tracking.
+ to lose tracking.
  Note the absence of ORB feature points in the right portion of image frame.
- At right, the axis shows that robot was in right track, but robot is oriented
- to a place without map points.
+ At right, the axis shows that robot was in right track, but robot was oriented
+ to a place with very few map points.
  The blue axis represents front.
 \end_layout
 
@@ -1972,7 +1980,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-ORB-SLAM about to lost tracking
+ORB-SLAM about to lose tracking
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:lost-tracking"
@@ -2004,7 +2012,8 @@ reference "fig:Coverage-for-Test-Run-1"
 
  for test run 1, both maps are essentially complementary to cover tracking
  for the whole track.
- However, there are still areas where ORB-SLAM lost tracks using both maps.
+ However, there are still areas where ORB-SLAM loses tracking using both
+ maps.
  This is evident when using multiple maps.
  Also notable is some stray points in trajectory from map 1; these points
  were traced to instances of lens flares due to camera facing south west
@@ -2031,6 +2040,14 @@ In both test runs localization system was unable to cover the whole ground
  (ORB-SLAM is unable to localize too long from last keyframe).
  Also, camera stopped working too early in test run 2, rendering ORB-SLAM
  stopped working.
+ Percentage of track covered by all maps are listed in table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:summary-performance"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2295,7 +2312,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="8" columns="5">
+<lyxtabular version="3" rows="11" columns="5">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
@@ -2539,6 +2556,100 @@ x
 </cell>
 </row>
 <row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Joint (Average)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Joint (Minimum)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
 <cell multicolumn="1" alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
@@ -2633,7 +2744,7 @@ x
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2642,7 +2753,7 @@ Map 2
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2651,7 +2762,7 @@ Map 2
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2660,7 +2771,7 @@ Map 2
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2669,11 +2780,58 @@ Map 2
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 x
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Joint
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \end_inset
@@ -2690,7 +2848,14 @@ x
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Errors from modified ORB-SLAM compared to ground truth
+Summary of performance compared to ground truth
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:summary-performance"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2708,6 +2873,13 @@ Discussion on Localization Results
 \end_layout
 
 \begin_layout Standard
+In both test runs, both maps were unable to cover complete course, notwithstandi
+ng practical limitations of this experiment.
+ Main cause is lost tracking in the middle of track.
+ In the event of lost tracking, ORB-SLAM was slow to recover.
+\end_layout
+
+\begin_layout Standard
 Why ORb was unable to cover whole tracks
 \end_layout
 
@@ -2716,7 +2888,7 @@ Possibility to cover all area
 \end_layout
 
 \begin_layout Standard
-Possibility to reduce errors: particle filter
+Possibility to reduce errors:
 \end_layout
 
 \begin_layout Standard
