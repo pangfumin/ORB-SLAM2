@@ -126,10 +126,28 @@ class PoseTable :
             ppose = self.table[p-1]
             if (tolerance>0) :
                 if abs(ppose.timestamp - cpose.timestamp) > tolerance:
+                    print('far')
                     continue
             dist = np.linalg.norm([cpose.x-ppose.x, cpose.y-ppose.y, cpose.z-ppose.z])
             totaldist += dist
         return totaldist
+        
+    def lengths (self):
+        dists = []
+        for p in range(1, len(self.table)):
+            cpose = self.table[p]
+            ppose = self.table[p-1]
+            dists.append (np.linalg.norm([cpose.x-ppose.x, cpose.y-ppose.y, cpose.z-ppose.z]))
+        return dists
+        
+    def timeLengths (self):
+        timeDists = []
+        for p in range(1, len(self.table)):
+            cpose = self.table[p]
+            ppose = self.table[p-1]
+            timeDists.append (abs(cpose.timestamp - ppose.timestamp))
+        return timeDists        
+        
     
     def toArray (self, includeTimestamp=False):
         if (includeTimestamp==True) :
@@ -287,6 +305,19 @@ class PoseTable :
             print ("{} out of {}".format(i, len(poseTbl1)))
         return errorVect
         
+    @staticmethod
+    # XXX: Unfinished
+    def removeSpuriousPoints (poseTbl1):
+        newposetbl = PoseTable()
+        for pose in poseTbl1.table:
+            pass
+        return newposetbl
+        
+    def timeCoverage (self):
+        timeTolerance = 0.5
+        tcov=0
+        
+            
     
 def joinPoseTables (*poseTbls):
     #Find maximum & minimum time

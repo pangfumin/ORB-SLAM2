@@ -264,16 +264,20 @@ LIDAR-based SLAM
 \end_layout
 
 \begin_layout Standard
-LIDAR-based SLAM is explained in 
+3D LIDAR-based SLAM is explained in 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "moosmann2011velodyne"
+key "nuchter20083drobotic"
 
 \end_inset
 
 .
- This SLAM method is popular for autonomous vehicle applications, and is
- capable to provide accurate maps and localization.
+ The LIDAR-based SLAM methods are popular for autonomous vehicle applications,
+ and are capable to provide accurate maps and localization.
+ The author however, does not particularly emphasize special method for
+ registration of scans from LIDAR devices.
+ Scan registration is important for computing rigid transformation of these
+ scans (thus compute mapping and localization).
  Of particular note, the LIDAR-based SLAM is used in Autoware 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -285,16 +289,31 @@ key "kato2015anopen"
 \end_layout
 
 \begin_layout Standard
-Velodyne-based SLAM takes 3D laser scans as input, and compose the map using
- any popular scan matching algorithms from those scans (for example, normal
- distribution transform 
+One commonly used method for 3D scan registration is Normal Distribution
+ Transforms as described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "magnusson2009thethreedimensional"
+
+\end_inset
+
+ and implemented in Point Cloud Library 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rusu20113dis"
+
+\end_inset
+
+.
+ As has been shown by 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "takeuchi2006a3d"
 
 \end_inset
 
-).
+, it is possible to build map and perform localization in real-time using
+ NDT.
 \end_layout
 
 \begin_layout Subsection
@@ -698,7 +717,7 @@ Main output of ORB-SLAM mapping is a set of keyframes.
  autonomous car.
  Therefore it is necessary to get localization results that are metrically
  acurate.
- However as illustrated in 
+ However as illustrated in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:ORB-SLAM-robot-trajectory"
@@ -1044,7 +1063,7 @@ Using Multiple Maps
 
 \begin_layout Standard
 During experiments, we found that maps from same place but different time
- will deliver different results.
+ will deliver varying results.
  Therefore it is logical to combine results from two maps in order to: 1)
  alternately provide localization whenever one of the maps fails; 2) reduce
  errors from all maps.
@@ -1437,6 +1456,8 @@ reference "fig:Ground-truth"
 \end_inset
 
 .
+ In the map trajectories, recordings were stopped before robot finished
+ the runs; however robot finished the track in all testing runs.
 \end_layout
 
 \begin_layout Standard
@@ -1445,6 +1466,17 @@ placement H
 wide false
 sideways false
 status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename GroundTruth.eps
+	width 100col%
+
+\end_inset
+
+
+\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -1710,63 +1742,22 @@ Map Saving and Restoration
 \end_layout
 
 \begin_layout Standard
-In our experience, map saving and restoration does not affect ORB-SLAM performan
-ce.
+Map data structures of ORB-SLAM can now be saved and restored at any time.
+ In our experience, map saving and restoration does not affect ORB-SLAM
+ performance.
  In fact, the system gains useful capability: map building can now be done
  incrementally, using same location in different times.
  This is useful for example, to build lifelong map in different situation
  such as weather and day/night.
- An example of map building is illustrated in figure 
+ An example of relocalization after map restoration is illustrated in figure
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:Partial-map"
+reference "fig:traversing-the-map"
 
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename partial map.png
-	lyxscale 70
-	width 100col%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Partial map being built after loading
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Partial-map"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsection
@@ -2018,7 +2009,6 @@ reference "fig:Coverage-for-Test-Run-1"
  Also notable is some stray points in trajectory from map 1; these points
  were traced to instances of lens flares due to camera facing south west
  in time of low sun.
- When using multiple maps, these stray points is suppressed.
  In test run 2 as depicted in 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -2291,6 +2281,13 @@ status open
 
 \begin_layout Plain Layout
 Error graphs from test run1 (top) and test run 2 (bottom)
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Error-graphs"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2324,6 +2321,8 @@ status open
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Map
 \end_layout
 
@@ -2333,6 +2332,8 @@ Map
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Errors (in m)
 \end_layout
 
@@ -2360,7 +2361,24 @@ Errors (in m)
 \begin_inset Text
 
 \begin_layout Plain Layout
-Coverage
+
+\size small
+% Coverage
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{Coverage is calculated by summing up total time covered by
+ the map and compared with equivalent total time by NDT, but excluding times
+ where ORB-SLAM lost tracking}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2380,6 +2398,8 @@ Coverage
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Average
 \end_layout
 
@@ -2389,6 +2409,8 @@ Average
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Std.
  Dev
 \end_layout
@@ -2399,6 +2421,8 @@ Std.
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Maximum
 \end_layout
 
@@ -2419,6 +2443,8 @@ Maximum
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Test Run 1
 \end_layout
 
@@ -2466,6 +2492,8 @@ Test Run 1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Map 1
 \end_layout
 
@@ -2475,6 +2503,8 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 0.38
 \end_layout
 
@@ -2484,6 +2514,8 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 1.60
 \end_layout
 
@@ -2493,6 +2525,8 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 26.41
 \end_layout
 
@@ -2502,7 +2536,9 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
-x
+
+\size small
+58.2
 \end_layout
 
 \end_inset
@@ -2513,6 +2549,8 @@ x
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Map 2
 \end_layout
 
@@ -2522,6 +2560,8 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 0.19
 \end_layout
 
@@ -2531,6 +2571,8 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 0.53
 \end_layout
 
@@ -2540,6 +2582,8 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 5.62
 \end_layout
 
@@ -2549,7 +2593,9 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
-x
+
+\size small
+59.1
 \end_layout
 
 \end_inset
@@ -2560,6 +2606,8 @@ x
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Joint (Average)
 \end_layout
 
@@ -2597,6 +2645,8 @@ Joint (Average)
 
 \begin_layout Plain Layout
 
+\size small
+81.5
 \end_layout
 
 \end_inset
@@ -2607,6 +2657,8 @@ Joint (Average)
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Joint (Minimum)
 \end_layout
 
@@ -2654,6 +2706,8 @@ Joint (Minimum)
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Test Run 2
 \end_layout
 
@@ -2701,6 +2755,8 @@ Test Run 2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Map 1
 \end_layout
 
@@ -2710,6 +2766,8 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 0.08
 \end_layout
 
@@ -2719,6 +2777,8 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 0.11
 \end_layout
 
@@ -2728,6 +2788,8 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 1.21
 \end_layout
 
@@ -2737,7 +2799,9 @@ Map 1
 \begin_inset Text
 
 \begin_layout Plain Layout
-x
+
+\size small
+61.1
 \end_layout
 
 \end_inset
@@ -2748,6 +2812,8 @@ x
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Map 2
 \end_layout
 
@@ -2757,6 +2823,8 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 0.06
 \end_layout
 
@@ -2766,6 +2834,8 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 0.09
 \end_layout
 
@@ -2775,6 +2845,8 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 1.67
 \end_layout
 
@@ -2784,7 +2856,9 @@ Map 2
 \begin_inset Text
 
 \begin_layout Plain Layout
-x
+
+\size small
+74.7
 \end_layout
 
 \end_inset
@@ -2795,6 +2869,8 @@ x
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size small
 Joint
 \end_layout
 
@@ -2832,6 +2908,8 @@ Joint
 
 \begin_layout Plain Layout
 
+\size small
+75.6
 \end_layout
 
 \end_inset
@@ -2873,10 +2951,107 @@ Discussion on Localization Results
 \end_layout
 
 \begin_layout Standard
-In both test runs, both maps were unable to cover complete course, notwithstandi
-ng practical limitations of this experiment.
+In both test runs, both maps were unable to cover complete course, practical
+ limitations notwithstanding.
  Main cause is lost tracking in the middle of track.
- In the event of lost tracking, ORB-SLAM was slow to recover.
+ In the event of lost tracking, ORB-SLAM was slow to recover, thus resulting
+ in relatively low coverage of each maps.
+\end_layout
+
+\begin_layout Standard
+In test run 1, all maps were unable to cover more than 60%; this can be
+ proved visually by assessing coverage plots in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Error-graphs"
+
+\end_inset
+
+.
+ Here, there are many 
+\begin_inset Quotes eld
+\end_inset
+
+blank time
+\begin_inset Quotes erd
+\end_inset
+
+ at each map.
+ However, it is possible to use both map together during a run to provide
+ joint coverage.
+ When this is the case, coverage increased significantly; this works by
+ fact that all maps works by complementing each other.
+ The same case also applies in run 2; but in this run there is high probability
+ that both maps were unable to cover significant part of the track, as observed
+ in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Error-graphs"
+
+\end_inset
+
+ bottom.
+ Both maps also shows different error levels when used in two runs; test
+ run 1 gave comparatively high error when compared to run 2.
+\end_layout
+
+\begin_layout Standard
+In general, there are two main causes for lost tracks: visual disturbances
+ (this includes, but not limited to, lens flare and complete vision occlusion),
+ and rapid rotation in part of robot due to dynamic obstacles.
+ An example of visual disturbances (in form of lens flare) causing lost
+ track and high errors is shown in track run 1 using map 1 at figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:disturbing-flare"
+
+\end_inset
+
+, where spurious points from localization are present.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename flare causes wrong localization.eps
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+At right, a part of robot trajectory is shown.
+ Circle A shows location where disturbance took place; B shows localization
+ results at that time.
+ At left, camera image at corresponding time.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:disturbing-flare"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
