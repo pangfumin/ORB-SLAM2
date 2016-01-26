@@ -2119,31 +2119,28 @@ name "fig:Coverage-for-Test-Run-2"
 
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 
 \end_layout
 
-\begin_layout Subsection
-Loop Closing
-\end_layout
-
 \begin_layout Standard
-The Tsukuba Challenge track features some areas that are ideal to test loop
- closing subsystem of any SLAM system.
- However, ORB-SLAM was not able to perform loop closing when they were supposed
- to take place.
- One important area is the Oshimizu park subtrack, that features a small
- roundabout with far buildings as background.
+In general, there are two main causes for lost tracks: visual disturbances
+ (this includes, but not limited to, lens flare and complete vision occlusion),
+ and rapid rotation in part of robot due to dynamic obstacles.
+ An example of visual disturbances (in form of lens flare) causing lost
+ track and high errors is shown in track run 1 using map 1 at figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:disturbing-flare"
+
+\end_inset
+
+, where spurious points from localization are present.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
-placement H
 wide false
 sideways false
 status open
@@ -2151,8 +2148,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename loop closing failure.png
-	lyxscale 70
+	filename flare causes wrong localization.eps
 	width 100col%
 
 \end_inset
@@ -2164,12 +2160,13 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-A particular place where loop closing failed to take place.
- Image contrast has been adjusted to lighten dark areas.
- Notice that most ORB points (green) fell in the background cloud.
+At right, a part of robot trajectory is shown.
+ Circle A shows location where disturbance took place; B shows localization
+ results at that time.
+ At left, camera image at corresponding time.
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:loop-closing-failure"
+name "fig:disturbing-flare"
 
 \end_inset
 
@@ -2251,6 +2248,31 @@ reference "fig:turning-map"
 \end_layout
 
 \begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:summary-performance"
+
+\end_inset
+
+ summarizes performance of ORB-SLAM when covering Tsukuba Challenge track.
+ In average, accuracy of ORB-SLAM is quite good when considering that errors
+ in order of 25 cm are within range of robot track.
+ However, there are some concerns when errors increases highly, especially
+ in test run 1.
+ But this errors may be considered as deviation from norms, as suggested
+ by figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:disturbing-flare"
+
+\end_inset
+
+.
+ In particular, these problems may be solved by using more robust camera.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -2309,7 +2331,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="11" columns="5">
+<lyxtabular version="3" rows="10" columns="5">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
@@ -2364,21 +2386,6 @@ Errors (in m)
 
 \size small
 % Coverage
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext{Coverage is calculated by summing up total time covered by
- the map and compared with equivalent total time by NDT, but excluding times
- where ORB-SLAM lost tracking}
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -2602,18 +2609,18 @@ Map 2
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell multicolumn="1" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 
 \size small
-Joint (Average)
+Joint
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2622,7 +2629,7 @@ Joint (Average)
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2631,7 +2638,7 @@ Joint (Average)
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2647,55 +2654,6 @@ Joint (Average)
 
 \size small
 81.5
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size small
-Joint (Minimum)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
 \end_layout
 
 \end_inset
@@ -2865,7 +2823,7 @@ Map 2
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell multicolumn="1" alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2876,7 +2834,7 @@ Joint
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2885,7 +2843,7 @@ Joint
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2894,7 +2852,7 @@ Joint
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2947,131 +2905,42 @@ name "tab:summary-performance"
 \end_layout
 
 \begin_layout Subsection
-Discussion on Localization Results
+Using Multiple Maps
 \end_layout
 
 \begin_layout Standard
-In both test runs, both maps were unable to cover complete course, practical
- limitations notwithstanding.
- Main cause is lost tracking in the middle of track.
- In the event of lost tracking, ORB-SLAM was slow to recover, thus resulting
- in relatively low coverage of each maps.
-\end_layout
+Despite giving good accuracy across the testing run in Tsukuba Challenge,
+ ORB-SLAM were unable to cover localization for the whole track.
+ By recapitulating the performance summary in table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:summary-performance"
 
-\begin_layout Standard
-In test run 1, all maps were unable to cover more than 60%; this can be
- proved visually by assessing coverage plots in figure 
+\end_inset
+
+, and figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Error-graphs"
 
 \end_inset
 
-.
- Here, there are many 
-\begin_inset Quotes eld
-\end_inset
-
-blank time
-\begin_inset Quotes erd
-\end_inset
-
- at each map.
- However, it is possible to use both map together during a run to provide
- joint coverage.
- When this is the case, coverage increased significantly; this works by
- fact that all maps works by complementing each other.
- The same case also applies in run 2; but in this run there is high probability
- that both maps were unable to cover significant part of the track, as observed
- in 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Error-graphs"
-
-\end_inset
-
- bottom.
- Both maps also shows different error levels when used in two runs; test
- run 1 gave comparatively high error when compared to run 2.
+, it is reasonable to say that we can cover larger part of the track using
+ joint map.
+ The joint map here are used alternately whenever any of them are unable
+ to provide tracking.
+ In some condition where multiple maps can cover the part of that track,
+ we can use sensor fusion approach to combine localization results.
 \end_layout
 
 \begin_layout Standard
-In general, there are two main causes for lost tracks: visual disturbances
- (this includes, but not limited to, lens flare and complete vision occlusion),
- and rapid rotation in part of robot due to dynamic obstacles.
- An example of visual disturbances (in form of lens flare) causing lost
- track and high errors is shown in track run 1 using map 1 at figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:disturbing-flare"
-
-\end_inset
-
-, where spurious points from localization are present.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename flare causes wrong localization.eps
-	width 100col%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-At right, a part of robot trajectory is shown.
- Circle A shows location where disturbance took place; B shows localization
- results at that time.
- At left, camera image at corresponding time.
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:disturbing-flare"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Why ORb was unable to cover whole tracks
-\end_layout
-
-\begin_layout Standard
-Possibility to cover all area
-\end_layout
-
-\begin_layout Standard
-Possibility to reduce errors:
-\end_layout
-
-\begin_layout Standard
-How to realize localization in the future?
-\end_layout
-
-\begin_layout Standard
-Is it possible for ORB-SLAM?
+Sensor fusion approach is also useful here when none of the maps could cover
+ the part of particular track.
+ The difference here is that we should use other sensors, preferably other
+ low cost ones, such as odometer and gyroscope.
+ There are a number of sensor fusion approach which may be used, such as
+ ....
+ 
 \end_layout
 
 \begin_layout Section
@@ -3082,11 +2951,9 @@ Conclusions and Future Work
 This work reported our approach for localization solutions in Tsukuba Challenge.
  Within limitations of our system, the experiments confirmed that vision-based
  localization using augmented maps from vision and LIDAR-based methods are
- capable to provide localization that are precise enough.
-\end_layout
-
-\begin_layout Standard
-Contrary to original results, ORB-SLAM was unable to give excellent results
+ capable to provide localization that are quite accurate for controlling
+ the robot.
+ Contrary to original results, ORB-SLAM was unable to give excellent results
  in dynamic environment such as Tsukuba Challenge.
  We suspect that due to significant time between mapping and localization,
  ORB-SLAM was unable to perform place recognition using its bag-of-words
