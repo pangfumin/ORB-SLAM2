@@ -76,7 +76,8 @@ Monocular Vision-based Localization using ORB-SLAM with LIDAR-aided Mapping
 \end_layout
 
 \begin_layout Author
-Adi Sujiwo, Tomohito Ando, Eijiro Takeuchi, and Yoshiki Ninomiya
+Adi Sujiwo, Tomohito Ando, Eijiro Takeuchi, Yoshiki Ninomiya and Masato
+ Edahiro
 \end_layout
 
 \begin_layout Abstract
@@ -98,6 +99,27 @@ Keyword: Visual Localization, Autonomous Vehicle, Field Robotics, Tsukuba
 
 \begin_layout Left Footer
 Journal of Robotics and Mechatronics
+\end_layout
+
+\begin_layout Center Footer
+
+\end_layout
+
+\begin_layout Right Footer
+
+\end_layout
+
+\begin_layout Left Header
+
+\end_layout
+
+\begin_layout Center Header
+
+\end_layout
+
+\begin_layout Right Header
+Monocular Vision-based Localization using ORB-SLAM with LIDAR-aided Mapping
+ in Real-World Robot Challenge
 \end_layout
 
 \begin_layout Section
@@ -893,7 +915,7 @@ status open
 \align center
 \begin_inset Graphics
 	filename metric_convertion.eps
-	width 60col%
+	width 70col%
 
 \end_inset
 
@@ -1484,6 +1506,7 @@ status open
 \begin_layout Plain Layout
 Ground truth from NDT scan matching of 4 runs.
  This map is metrically correct.
+ The passed track from each runs are slightly different.
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:Ground-truth"
@@ -1673,7 +1696,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Typical situation in Tsukuba Challenge: pedestrian tracks covered in falling
+Typical situation in Tsukuba Challenge: pedestrian tracks covered with falling
  leaves
 \begin_inset CommandInset label
 LatexCommand label
@@ -1747,8 +1770,8 @@ Map data structures of ORB-SLAM can now be saved and restored at any time.
  performance.
  In fact, the system gains useful capability: map building can now be done
  incrementally, using same location in different times.
- This is useful for example, to build lifelong map in different situation
- such as weather and day/night.
+ This is useful for example, to build lifelong map in different situations
+ such as varying weather and day/night.
  An example of relocalization after map restoration is illustrated in figure
  
 \begin_inset CommandInset ref
@@ -1758,6 +1781,37 @@ reference "fig:traversing-the-map"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename partial map.eps
+	width 100col%
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+ORB-SLAM created a new map based on old map
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1958,8 +2012,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename about to lose tracking.png
-	lyxscale 60
+	filename about to lose tracking.eps
 	width 100col%
 
 \end_inset
@@ -2929,18 +2982,39 @@ reference "fig:Error-graphs"
  joint map.
  The joint map here are used alternately whenever any of them are unable
  to provide tracking.
- In some condition where multiple maps can cover the part of that track,
+ In some condition where multiple maps can cover some parts of that track,
  we can use sensor fusion approach to combine localization results.
 \end_layout
 
 \begin_layout Standard
 Sensor fusion approach is also useful here when none of the maps could cover
- the part of particular track.
+ any part of particular track 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "morales2009autonomous"
+
+\end_inset
+
+.
  The difference here is that we should use other sensors, preferably other
  low cost ones, such as odometer and gyroscope.
  There are a number of sensor fusion approach which may be used, such as
- ....
- 
+ Kalman filter or particle filter 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "thrun2005probabilistic"
+
+\end_inset
+
+.
+ This method has been succesfully used, as in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "morales2009autonomous"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
@@ -2970,7 +3044,8 @@ Despite a good results, there are still some room for improvements that
  In this regard, we suggest next works to integrate other low-cost methods
  such as odometry and gyroscope solutions.
  In the mapping, we also suggest replacing the LIDAR to other global SLAM
- methods, such as GPS .
+ methods, such as GPS.
+ Also crucial is acceleration of initial position fix
 \end_layout
 
 \begin_layout Standard
@@ -2982,6 +3057,10 @@ options "ieeetr"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section*
+Author's Biography
 \end_layout
 
 \end_body
