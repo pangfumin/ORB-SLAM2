@@ -813,8 +813,9 @@ key "burschka2004vgpsslam"
 In the localization process, the system depends solely on ORB-SLAM method.
  Therefore, external methods such as LIDAR-based localization are not required.
  To compute the true value of pose, the system modifies position value to
- correct distance deformation according to this formula.
- This transformation is illustrated in 
+ correct distance deformation according to the following formula.
+ All poses use poses' matrix representations.
+ This transformation is illustrated in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:metric-convertion"
@@ -3043,9 +3044,10 @@ Despite a good results, there are still some room for improvements that
  critically when the vision-based localization fails.
  In this regard, we suggest next works to integrate other low-cost methods
  such as odometry and gyroscope solutions.
- In the mapping, we also suggest replacing the LIDAR to other global SLAM
- methods, such as GPS.
- Also crucial is acceleration of initial position fix
+ In the mapping, we also suggest replacing the LIDAR to other global localizatio
+n methods, such as GPS-based one.
+ Also a crucial matter is acceleration of initial position fix after map
+ restoration.
 \end_layout
 
 \begin_layout Standard
