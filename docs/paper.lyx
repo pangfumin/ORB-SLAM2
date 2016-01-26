@@ -5,6 +5,7 @@
 \textclass article
 \begin_preamble
 \usepackage{hyperref}
+\date{}
 \end_preamble
 \use_default_options true
 \begin_modules
@@ -127,19 +128,21 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Recently, autonomous driving system and advanced driving assist system are
- actively developed.
+Recently, autonomous driving systems and advanced driving assistance systems
+ are actively developed.
  Google already tests autonomous driving in urban environment over 150km.
- Google uses High precision and accurate 3D LIDAR (Light Detection and Ranging)
- for localization and recognition.
+ At current state, they use high precision and accurate 3D LIDAR (Light
+ Detection and Ranging) for localization and recognition.
  Such sensors are still expensive relative to other vehicle sensors such
  as camera and millimeter wave range sensor.
+ However, consumer-level vehicles require low-cost devices yet reliable
+ for localization and recognition.
  On the other hand, high precision environment digital maps are active research
  areas within autonomous driving systems.
  An example is Mobile Mapping Systems (MMS), which is capable to measure
  accurate 3D point cloud maps by driving on urban road.
- Such 3D maps are basic technology of recent autonomous vehicles.
- 
+ Such 3D maps are basic technology of recent autonomous vehicles as they
+ store important information for autonomous functions, such as localization.
 \end_layout
 
 \begin_layout Standard
@@ -646,6 +649,7 @@ status open
 ORB-SLAM map trajectories from different time are plotted in (1) and (2).
  (3) is ground truth.
  (4) is zoomed part of red rectangle in (1).
+ In (5), corrected ORB-SLAM map from distance scale of NDT
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:ORB-SLAM-robot-trajectory"
@@ -973,8 +977,7 @@ reference "fig:3D-map"
  is visualization of 3D map of the Tsukuba Challenge track.
  This map was built by 3D NDT scan-matching method using Velodyne HDL32
  LIDAR.
- Fig.
- 
+ Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Ground-truth"
@@ -2180,7 +2183,7 @@ name "fig:Coverage-for-Test-Run-2"
 
 \begin_layout Standard
 In general, there are two main causes for lost tracks: visual disturbances
- (this includes, but not limited to, lens flare and complete vision occlusion),
+ (including, but not limited to, lens flare and complete vision occlusion),
  and rapid rotation in part of robot due to dynamic obstacles.
  An example of visual disturbances (in form of lens flare) causing lost
  track and high errors is shown in track run 1 using map 1 at figure 
@@ -2243,7 +2246,6 @@ Accuracy of Corrected Localization
 
 \begin_layout Standard
 \begin_inset Float figure
-placement H
 wide false
 sideways false
 status open
@@ -2251,7 +2253,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename path inspection.svg
+	filename path-inspection.eps
 	lyxscale 70
 	width 100col%
 
@@ -2264,9 +2266,8 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Example of visual comparison of Modified ORB-SLAM trajectory against ground
- truth (blue curve).
- Map 1 result is depicted in green, while map 2 in red.
+Example of visual comparison of Modified ORB-SLAM trajectory and ground
+ truth
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:turning-map"
@@ -2294,9 +2295,9 @@ reference "fig:turning-map"
 
 \end_inset
 
- depicts a turning situation continued by straight path.
- In the turning, modified ORB-SLAM shows deviations compared to ground truth,
- while straight path has less deviation.
+ depicts a situation when the robot entering and exiting a turnabout.
+ In the turning, modified ORB-SLAM shows larger deviations compared to ground
+ truth, while straight path has less deviation.
  It is also clear that each maps give different results, despite running
  in the exact same path and time.
 \end_layout
@@ -2323,7 +2324,7 @@ reference "fig:disturbing-flare"
 \end_inset
 
 .
- In particular, these problems may be solved by using more robust camera.
+ In particular, this problem may be solved by using more robust camera.
 \end_layout
 
 \begin_layout Standard
@@ -2378,6 +2379,7 @@ name "fig:Error-graphs"
 
 \begin_layout Standard
 \begin_inset Float table
+placement H
 wide false
 sideways false
 status open
@@ -2599,7 +2601,7 @@ Map 1
 \begin_layout Plain Layout
 
 \size small
-58.2
+68.3
 \end_layout
 
 \end_inset
@@ -2656,7 +2658,7 @@ Map 2
 \begin_layout Plain Layout
 
 \size small
-59.1
+70.1
 \end_layout
 
 \end_inset
@@ -2707,7 +2709,7 @@ Joint
 \begin_layout Plain Layout
 
 \size small
-81.5
+95.1
 \end_layout
 
 \end_inset
@@ -2813,7 +2815,7 @@ Map 1
 \begin_layout Plain Layout
 
 \size small
-61.1
+68.4
 \end_layout
 
 \end_inset
@@ -2870,7 +2872,7 @@ Map 2
 \begin_layout Plain Layout
 
 \size small
-74.7
+80.9
 \end_layout
 
 \end_inset
@@ -2921,7 +2923,7 @@ Joint
 \begin_layout Plain Layout
 
 \size small
-75.6
+82.4
 \end_layout
 
 \end_inset
@@ -3063,6 +3065,38 @@ options "ieeetr"
 
 \begin_layout Section*
 Author's Biography
+\end_layout
+
+\begin_layout Standard
+\begin_inset Wrap figure
+lines 0
+placement l
+overhang 0in
+width "30col%"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename sujiwo.jpg
+	lyxscale 10
+	width 40col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Name: Adi Sujiwo
+\end_layout
+
+\begin_layout Standard
+Affiliation: Nagoya University
 \end_layout
 
 \end_body

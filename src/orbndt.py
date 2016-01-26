@@ -313,10 +313,64 @@ class PoseTable :
             pass
         return newposetbl
         
-    def timeCoverage (self):
-        timeTolerance = 0.5
-        tcov=0
+    def findBlankTime(self, timeTolerance=0.5):
+        blanks = []
+        for p in range(1, len(self.table)):
+            cpose = self.table[p]
+            ppose = self.table[p-1]
+            if abs(cpose.timestamp - ppose.timestamp) > timeTolerance:
+                blanks.append([ppose, cpose])
+        return blanks
         
+    def lengthFrom2Pose (self, poseIndex1, poseIndex2):
+        if (type(poseIndex1)==int):
+            dist = 0.0
+            for i in range(poseIndex1+1, poseIndex2+1):
+                cpose = self.table[i]
+                ppose = self.table[i-1]
+                cdist = np.linalg.norm([cpose.x-ppose.x, cpose.y-ppose.y, cpose.z-ppose.z], 2)
+                dist += cdist
+            return dist
+    
+    def lengthFrom2Times(self, time1, time2):
+        pose1 = self.findNearestInTime(time1, 0.25)
+        idx1 = self.table.index(pose1)
+        pose2 = self.findNearestInTime(time2, 0.25)
+        idx2 = self.table.index(pose2)
+        return self.lengthFrom2Pose (idx1, idx2)
+        
+    def subset (self, startIdx, stopIdx):
+        poseTblSubset = PoseTable()
+        for i in range(startIdx, stopIdx+1):
+            p = self.table[i]
+            poseTblSubset.append(p)
+        return poseTblSubset
+        
+    def findBlankLengthFromGroundTruth (self, groundTruthTbl):
+        tolerance = 0.25
+        blankDistFront = 0
+        # Find blank distance in front
+        if groundTruthTbl[0].timestamp < self.table[0].timestamp:
+            pgrnd = groundTruthTbl.findNearestInTime (self.table[0].timestamp, tolerance)
+            idx = groundTruthTbl.table.index(pgrnd)
+            blankDistFront = groundTruthTbl.lengthFrom2Pose (0, idx)
+        else:
+            blankDistFront = 0
+        # Find blank distance in rear
+        blankDistRear = 0
+        if (groundTruthTbl.last().timestamp > self.table[-1].timestamp):
+            pgrnd = groundTruthTbl.findNearestInTime (self.table[-1].timestamp, tolerance)
+            idx = groundTruthTbl.table.index (pgrnd)
+            blankDistRear = groundTruthTbl.lengthFrom2Pose (idx, len(groundTruthTbl)-1)
+        else:
+            blankDistRear = 0
+        # Find blank distances in middle
+        blankPoses = self.findBlankTime(tolerance)
+        blankDistMid = 0
+        for bPose in blankPoses:
+            d = groundTruthTbl.lengthFrom2Times (bPose[0].timestamp, bPose[1].timestamp)
+            blankDistMid += d
+        return blankDistFront + blankDistMid + blankDistRear
             
     
 def joinPoseTables (*poseTbls):
