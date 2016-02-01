@@ -36,6 +36,7 @@
 
 #include<iostream>
 #include<fstream>
+#include <cstdio>
 
 
 using namespace std;
@@ -1057,7 +1058,7 @@ bool Tracking::Relocalisation()
             int nmatches = matcher.SearchByBoW(pKF,mCurrentFrame,vvpMapPointMatches[i]);
             // I modified this to accelerate matching
 //            if(nmatches<15)
-            if(nmatches<3)
+            if(nmatches<6)
             {
                 vbDiscarded[i] = true;
                 continue;
@@ -1076,6 +1077,8 @@ bool Tracking::Relocalisation()
     // Until we found a camera pose supported by enough inliers
     bool bMatch = false;
     ORBmatcher matcher2(0.9,true);
+
+    printf ("Candidates: %d\n", nCandidates);
 
     while(nCandidates>0 && !bMatch)
     {

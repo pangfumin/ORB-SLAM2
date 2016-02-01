@@ -372,6 +372,13 @@ class PoseTable :
             blankDistMid += d
         return blankDistFront + blankDistMid + blankDistRear
             
+            
+    @staticmethod
+    def loadSegwayStatusFromBag (bagFilename) :
+        segwayPose = PoseTable()
+        
+        return segwayPose
+    
     
 def joinPoseTables (*poseTbls):
     #Find maximum & minimum time
