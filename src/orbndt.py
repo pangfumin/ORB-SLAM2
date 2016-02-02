@@ -8,6 +8,7 @@ from copy import copy, deepcopy
 from exceptions import KeyError, ValueError
 from segway_rmp.msg import SegwayStatusStamped
 import matplotlib.pyplot as plt
+from math import cos, sin, tan
 
 
 ndtFName = '/home/sujiwo/ORB_SLAM/Data/20151106-1/ndt.csv'
@@ -380,15 +381,48 @@ class PoseTable :
         
         bagsrc = rosbag.Bag(bagFilename, mode='r')
         lastStamp = 0
+        
+        def toSec(rosTime):
+            return rosTime.secs + rosTime.nsecs*1e-9
+        
+        cPose = Pose()
+        cPose.theta = 0.0
+        i = 0
+        # this is minimum speed to consider yaw changes (ie. yaw damping)
+        minSpeed = 5e-3
+        
         for topic, msg, timestamp in bagsrc.read_messages():
             try:
                 if lastStamp==0:
                     lastStamp = timestamp
                     continue
+                
+                dt = toSec (timestamp - lastStamp)
+                lastStamp = timestamp
+                v = (msg.segway.left_wheel_velocity + msg.segway.right_wheel_velocity) / 2
+                # XXX: May need to change this line 
+                if v > minSpeed:
+                    w = (msg.segway.yaw_rate+0.011)*0.98
+                else:
+                    w = 0.0
+                
+                cPose.x += v*cos(cPose.theta) * dt
+                cPose.y += v*sin(cPose.theta) * dt
+                cPose.theta += w * dt
+                cPose.velocity = v
+                
+                segwayPose.append (copy(cPose))
+                i += 1
+                print (i)
+                
             except KeyError:
                 continue
         
         return segwayPose
+        
+        
+def joinOrbOdometry (orb1, orb2, odom):
+    pass
     
     
 def joinPoseTables (*poseTbls):
@@ -496,4 +530,4 @@ def formatResultAsRecords (resultMat):
 
 
 if __name__ == '__main__' :
-    segwayPoses = PoseTable.loadSegwayStatusFromBag("/home/sujiwo/Data/TsukubaChallenge/run1/run0-segway.bag")
+    segwayPoses = PoseTable.loadSegwayStatusFromBag("/tmp/run0-segway.bag")
