@@ -6,6 +6,7 @@ import rosbag
 import rospy
 from copy import copy, deepcopy
 from exceptions import KeyError, ValueError
+from segway_rmp.msg import SegwayStatusStamped
 import matplotlib.pyplot as plt
 
 
@@ -377,6 +378,16 @@ class PoseTable :
     def loadSegwayStatusFromBag (bagFilename) :
         segwayPose = PoseTable()
         
+        bagsrc = rosbag.Bag(bagFilename, mode='r')
+        lastStamp = 0
+        for topic, msg, timestamp in bagsrc.read_messages():
+            try:
+                if lastStamp==0:
+                    lastStamp = timestamp
+                    continue
+            except KeyError:
+                continue
+        
         return segwayPose
     
     
@@ -485,6 +496,4 @@ def formatResultAsRecords (resultMat):
 
 
 if __name__ == '__main__' :
-    orb1 = PoseTable.loadFromBagFile('/home/sujiwo/Data/TsukubaChallenge/run2-map1.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
-    orb2 = PoseTable.loadFromBagFile('/home/sujiwo/Data/TsukubaChallenge/run2-map3.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
-    orbj = joinPoseTables (orb1, orb2)
+    segwayPoses = PoseTable.loadSegwayStatusFromBag("/home/sujiwo/Data/TsukubaChallenge/run1/run0-segway.bag")
