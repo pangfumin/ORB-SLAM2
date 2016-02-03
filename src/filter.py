@@ -8,11 +8,12 @@ Created on Wed Feb  3 11:35:58 2016
 from __future__ import division
 import numpy as np
 from copy import copy
+import random
 
 
 class Observation:
     def __init__ (self, observation):
-        pass
+        self.complete = False
 
 
 class Particle:
@@ -40,4 +41,12 @@ class ParticleFilter:
             self.motion (particle.state, control)
             
         # Update
-            
+        if (observation.complete != True):
+            return
+        # 1: Importance factor
+        w_all = 0
+        for particle in self.particles:
+            particle.w = measurement (particle.state, observation)
+            w_all += particle.w
+        # 2: Resampling
+        
