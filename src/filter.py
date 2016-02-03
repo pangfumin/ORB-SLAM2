@@ -17,15 +17,17 @@ class Observation:
 
 
 class Particle:
-    def __init__ (self, stateInitFunc):
+    def __init__ (self, stateInitFunc=None):
         self.w = 0
-        self.state = stateInitFunc()
+        if (stateInitFunc is not None):
+            self.state = stateInitFunc()
 
 
 
 class ParticleFilter:
     
     def __init__ (self, numOfParticles, stateInitFunc, motionModelFunc, measurementModelFunc):
+        self.numOfParticles = numOfParticles
         self.motion = motionModelFunc
         self.measurement = measurementModelFunc
         # generate and initialize particles
@@ -49,4 +51,13 @@ class ParticleFilter:
             particle.w = measurement (particle.state, observation)
             w_all += particle.w
         # 2: Resampling
+        r = random.random() / float(self.numOfParticles)
+        i = 0
+        particles_new = [Particle() for ip in range(self.numOfParticles)]
+        for m in range(self.numOfParticles) :
+            U = r + m / float(self.numOfParticles)
+            while (U > c):
+                i+=1
+                c += self.particles[i] / w_all
+                particles_new[m].state = self.particles[i].state
         
