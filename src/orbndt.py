@@ -8,7 +8,8 @@ from copy import copy, deepcopy
 from exceptions import KeyError, ValueError
 from segway_rmp.msg import SegwayStatusStamped
 import matplotlib.pyplot as plt
-from math import cos, sin, tan
+from math import cos, sin, tan, exp
+from filter import ParticleFilter, Particle
 
 
 ndtFName = '/home/sujiwo/ORB_SLAM/Data/20151106-1/ndt.csv'
@@ -54,6 +55,25 @@ class Pose :
         
     def __sub__ (self, p1):
         return np.array([self.x-p1.x, self.y-p1.y, self.z-p1.z])
+
+    # Only calculate movement, but does not overwrite the values
+    # currentTimestamp must be in second
+    def segwayMove (self, currentTimestamp, leftWheelVelocity, rightWheelVelocity, yawRate):
+        # this is minimum speed to consider yaw changes (ie. yaw damping)
+        minSpeed = 5e-3        
+        
+        v = (leftWheelVelocity + rightWheelVelocity) / 2
+        dt = currentTimestamp - self.timestamp
+        # XXX: May need to change this line 
+        if v > minSpeed:
+            w = (yawRate+0.011)*0.98
+        else:
+            w = 0.0
+        
+        x = self.x + v*cos(self.theta) * dt
+        y = self.y + v*sin(self.theta) * dt
+        theta = self.theta + w * dt
+        return x, y, theta
         
     @staticmethod
     def interpolate (pose1, pose2, tm):
@@ -376,43 +396,33 @@ class PoseTable :
             
             
     @staticmethod
-    def loadSegwayStatusFromBag (bagFilename) :
+    def loadSegwayStatusFromBag (bagFilename, limitMsg=0) :
         segwayPose = PoseTable()
         
         bagsrc = rosbag.Bag(bagFilename, mode='r')
-        lastStamp = 0
-        
-        def toSec(rosTime):
-            return rosTime.secs + rosTime.nsecs*1e-9
         
         cPose = Pose()
         cPose.theta = 0.0
         i = 0
-        # this is minimum speed to consider yaw changes (ie. yaw damping)
-        minSpeed = 5e-3
         
         for topic, msg, timestamp in bagsrc.read_messages():
             try:
-                if lastStamp==0:
-                    lastStamp = timestamp
+                if cPose.timestamp == 0:
+                    cPose.timestamp = timestamp.to_sec()
                     continue
-                
-                dt = toSec (timestamp - lastStamp)
-                lastStamp = timestamp
-                v = (msg.segway.left_wheel_velocity + msg.segway.right_wheel_velocity) / 2
-                # XXX: May need to change this line 
-                if v > minSpeed:
-                    w = (msg.segway.yaw_rate+0.011)*0.98
-                else:
-                    w = 0.0
-                
-                cPose.x += v*cos(cPose.theta) * dt
-                cPose.y += v*sin(cPose.theta) * dt
-                cPose.theta += w * dt
-                cPose.velocity = v
+                x, y, theta = cPose.segwayMove(timestamp.to_sec(), 
+                    msg.segway.left_wheel_velocity, 
+                    msg.segway.right_wheel_velocity, 
+                    msg.segway.yaw_rate)
+                cPose.x = x
+                cPose.y = y
+                cPose.theta = theta
+                cPose.timestamp = timestamp.to_sec()
                 
                 segwayPose.append (copy(cPose))
                 i += 1
+                if (limitMsg!=0 and i>=limitMsg):
+                    break
                 print (i)
                 
             except KeyError:
@@ -421,8 +431,50 @@ class PoseTable :
         return segwayPose
         
         
-def joinOrbOdometry (orb1, orb2, odom):
-    pass
+def joinOrbOdometry (orb1, orb2, odomTable):
+    orbError = 0.5
+    numOfParticles = 250
+    timeTolerance = 0.2
+    
+    def odoMotionModel(particleState, move):
+        x, y, theta = particleState.segwayMove (move['time'], move['left'], move['right'], move['yawRate'])
+        particleState.x = x
+        particleState.y = y
+        particleState.theta = theta
+
+    def odoMeasurementModel(particleOdomState, orbPose):
+        x = particleOdomState.x
+        y = particleOdomState.y
+        w = exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
+            ((y-orbPose.y)**2)/(2*orbError*orbError)))        
+        return w
+
+    def stateInitFunc ():
+        return Pose(0)
+        
+    PF = ParticleFilter(numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel)
+    
+    # We assume odometry is always available from start to finish
+    for odomMove in odomTable:
+        # determine final ORB pose from two maps
+        orbp1 = orb1.findNearestInTime (odomMove[0], timeTolerance)
+        orbp2 = orb2.findNearestInTime (odomMove[0], timeTolerance)
+        if (orbp1 != None and orbp2 == None):
+            orbj = orbp1
+        elif (orbp1 == None and orbp2 != None):
+            orbj = orbp2
+        elif (orbp1 == None and orbp2 == None):
+            orbj = None
+        else:
+            orbj = Pose()
+            orbj.timestamp = (orbp1.timestamp+orbp2.timestamp)/2
+            orbj.x = (orbp1.x+orbp2.x)/2
+            orbj.y = (orbp1.y+orbp2.y)/2
+            orbj.z = (orbp1.z+orbp2.z)/2
+            
+        movement = {'time':odomMove[0], 'left':odomMove[1], 'right':odomMove[2], 'yawRate':odomMove[3]}
+        PF.update (movement, orbj)
+        
     
     
 def joinPoseTables (*poseTbls):
@@ -530,4 +582,8 @@ def formatResultAsRecords (resultMat):
 
 
 if __name__ == '__main__' :
-    segwayPoses = PoseTable.loadSegwayStatusFromBag("/tmp/run0-segway.bag")
+    
+    segwayPoseMat = np.loadtxt('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/run0-segway.csv')
+    orb1poses = PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run0-map1.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
+    orb2poses = PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run0-map3.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
+    joinOrbOdometry (orb1poses, orb2poses, segwayPoseMat)
