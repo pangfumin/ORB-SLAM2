@@ -16,7 +16,18 @@ class Particle:
         self.w = 0
         if (stateInitFunc is not None):
             self.state = stateInitFunc()
+            self.prevState = stateInitFunc()
+        else:
+            self.state = None
+            self.prevState = None       
+        
+    def swapState (self):
+        self.state, self.prevState = self.prevState, self.state
 
+
+def nrand (num) :
+    r = num * np.sqrt(-2.0*np.log(random.random())) * np.cos(2.0*np.pi*random.random())
+    return r
 
 
 class ParticleFilter:
@@ -34,8 +45,8 @@ class ParticleFilter:
     def update (self, control, observation=None):
         # Prediction
         for particle in self.particles:
-            particle.prevState = copy (particle.state)
-            self.motion (particle.state, control)
+            particle.state = self.motion (particle.state, control)
+            particle.swapState()
             
         # Update
         if (observation==None):
@@ -49,11 +60,16 @@ class ParticleFilter:
         r = random.random() / float(self.numOfParticles)
         i = 0
         c = 0
-        particles_new = [Particle() for ip in range(self.numOfParticles)]
         for m in range(self.numOfParticles) :
             U = r + m / float(self.numOfParticles)
             while (U > c):
                 i+=1
-                c += self.particles[i] / w_all
-                particles_new[m].state = self.particles[i].state
+                c += self.particles[i].w / w_all
+            self.particles[m].state = self.particle[i].state
+        for m in range(self.numOfParticles) :
+            self.particles[m].swapState()
+            
+    def getStates (self):
+        st = [p.state for p in self.particles]
+        return st
         

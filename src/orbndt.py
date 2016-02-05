@@ -8,8 +8,9 @@ from copy import copy, deepcopy
 from exceptions import KeyError, ValueError
 from segway_rmp.msg import SegwayStatusStamped
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from math import cos, sin, tan, exp
-from filter import ParticleFilter, Particle
+from filter import ParticleFilter, nrand
 
 
 ndtFName = '/home/sujiwo/ORB_SLAM/Data/20151106-1/ndt.csv'
@@ -435,12 +436,25 @@ def joinOrbOdometry (orb1, orb2, odomTable):
     orbError = 0.5
     numOfParticles = 250
     timeTolerance = 0.2
+    WheelError = 0.3
     
+    # Here, "Particle State" is an estimated Pose
     def odoMotionModel(particleState, move):
-        x, y, theta = particleState.segwayMove (move['time'], move['left'], move['right'], move['yawRate'])
+        if particleState.timestamp==0:
+            particleState.timestamp = move['time']
+            return particleState
+        
+        # XXX: Add randomized component to left & right wheel velocity
+        vl = move['left'] + nrand(WheelError)
+        vr = move['right'] + nrand(WheelError)
+        # vr = move['right] + random_vr
+            
+        x, y, theta = particleState.segwayMove (move['time'], vl, vr, move['yawRate'])
         particleState.x = x
         particleState.y = y
         particleState.theta = theta
+        particleState.timestamp = move['time']
+        return particleState
 
     def odoMeasurementModel(particleOdomState, orbPose):
         x = particleOdomState.x
@@ -450,7 +464,15 @@ def joinOrbOdometry (orb1, orb2, odomTable):
         return w
 
     def stateInitFunc ():
-        return Pose(0)
+        p = Pose(0)
+        p.theta = 0.0
+        return p
+        
+    def buildStateTables (stateList):
+        tbl = PoseTable()
+        for p in stateList:
+            tbl.append(p)
+        return tbl
         
     PF = ParticleFilter(numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel)
     
@@ -471,9 +493,15 @@ def joinOrbOdometry (orb1, orb2, odomTable):
             orbj.x = (orbp1.x+orbp2.x)/2
             orbj.y = (orbp1.y+orbp2.y)/2
             orbj.z = (orbp1.z+orbp2.z)/2
+        if (orbj.timestamp > odomMove[0]):
+            orbj = None
             
         movement = {'time':odomMove[0], 'left':odomMove[1], 'right':odomMove[2], 'yawRate':odomMove[3]}
+        print str(datetime.datetime.fromtimestamp(movement['time']))
         PF.update (movement, orbj)
+        states = PF.getStates()
+        curStates = buildStateTables(states)
+        continue
         
     
     
@@ -583,7 +611,7 @@ def formatResultAsRecords (resultMat):
 
 if __name__ == '__main__' :
     
-    segwayPoseMat = np.loadtxt('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/run0-segway.csv')
+    segwayPoseMat = np.loadtxt('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/run0-segway-bak.csv')
     orb1poses = PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run0-map1.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
     orb2poses = PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run0-map3.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
     joinOrbOdometry (orb1poses, orb2poses, segwayPoseMat)
