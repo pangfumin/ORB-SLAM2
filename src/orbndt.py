@@ -66,7 +66,7 @@ class Pose :
         v = (leftWheelVelocity + rightWheelVelocity) / 2
         dt = currentTimestamp - self.timestamp
         # XXX: May need to change this line 
-        if v > minSpeed:
+        if abs(v) > minSpeed:
             w = (yawRate+0.011)*0.98
         else:
             w = 0.0
@@ -433,7 +433,8 @@ class PoseTable :
         
         
 def joinOrbOdometry (orb1, orb2, odomTable):
-    orbError = 0.5
+    # We should tune these parameters
+    orbError = 10.0
     numOfParticles = 250
     timeTolerance = 0.2
     WheelError = 0.3
@@ -477,6 +478,7 @@ def joinOrbOdometry (orb1, orb2, odomTable):
     PF = ParticleFilter(numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel)
     
     # We assume odometry is always available from start to finish
+    i = 0
     for odomMove in odomTable:
         # determine final ORB pose from two maps
         orbp1 = orb1.findNearestInTime (odomMove[0], timeTolerance)
@@ -493,14 +495,17 @@ def joinOrbOdometry (orb1, orb2, odomTable):
             orbj.x = (orbp1.x+orbp2.x)/2
             orbj.y = (orbp1.y+orbp2.y)/2
             orbj.z = (orbp1.z+orbp2.z)/2
-        if (orbj.timestamp > odomMove[0]):
+        if (orbj!=None and orbj.timestamp > odomMove[0]):
             orbj = None
             
+#        if (orbj!=None):
+#            print ("Found")
+#            return
+
         movement = {'time':odomMove[0], 'left':odomMove[1], 'right':odomMove[2], 'yawRate':odomMove[3]}
-        print str(datetime.datetime.fromtimestamp(movement['time']))
         PF.update (movement, orbj)
-        states = PF.getStates()
-        curStates = buildStateTables(states)
+        i += 1
+        print (i)
         continue
         
     

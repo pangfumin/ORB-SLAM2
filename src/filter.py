@@ -65,7 +65,7 @@ class ParticleFilter:
             while (U > c):
                 i+=1
                 c += self.particles[i].w / w_all
-            self.particles[m].state = self.particle[i].state
+            self.particles[m].state = self.particles[i].state
         for m in range(self.numOfParticles) :
             self.particles[m].swapState()
             
