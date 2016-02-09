@@ -11,23 +11,68 @@ from filter import ParticleFilter
 from segway_rmp.msg import SegwayStatusStamped
 import tf
 from orbndt import Pose, PoseTable
-from time import sleep
 import wx
 import numpy as np
 from matplotlib.figure import Figure, Axes
 from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigureCanvas
+import random
 
 
 robotPosition = Pose()
 orbListener = None
 updated = False
 TIMER_ID = wx.NewId ()
+PF = None
 
+# We should tune these parameters
+orbError = 10.0
+numOfParticles = 250
+timeTolerance = 0.2
+WheelError = 0.3
+particleStateList = np.zeros((numOfParticles, 2))
+
+
+
+    
+def nrand (num) :
+    r = num * np.sqrt(-2.0*np.log(random.random())) * np.cos(2.0*np.pi*random.random())
+    return r
+    
+def odoMotionModel(particleState, move):
+    global WheelError
+    if particleState.timestamp==0:
+        particleState.timestamp = move['time']
+        return particleState
+    
+    # XXX: Add randomized component to left & right wheel velocity
+    vl = move['left'] + nrand(WheelError)
+    vr = move['right'] + nrand(WheelError)
+    # vr = move['right] + random_vr
+        
+    x, y, theta = particleState.segwayMove (move['time'], vl, vr, move['yawRate'])
+    particleState.x = x
+    particleState.y = y
+    particleState.theta = theta
+    particleState.timestamp = move['time']
+    return particleState
+
+def odoMeasurementModel(particleOdomState, orbPose):
+    global orbError
+    x = particleOdomState.x
+    y = particleOdomState.y
+    w = np.exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
+        ((y-orbPose.y)**2)/(2*orbError*orbError)))        
+    return w
+
+def stateInitFunc ():
+    p = Pose(0)
+    p.theta = 0.0
+    return p
 
 
 def segwayOdomCallback (msg):
-    global robotPosition, orbListener, updated
+    global robotPosition, orbListener, updated, PF, numOfParticles, particleStateList
     times = msg.header.stamp.to_sec()
     
     if robotPosition.timestamp==0:
@@ -41,16 +86,25 @@ def segwayOdomCallback (msg):
         msg.segway.right_wheel_velocity, 
         msg.segway.yaw_rate)
     robotPosition.timestamp = times
-    updated = True
-#    print (robotPosition.x, robotPosition.y)
     
-#     Try to get position from ORB
-#    try:
-#        (orbTrans, orbRot) = orbListener.lookupTransform ('ORB_SLAM/World', 'ORB_SLAM/ExtCamera', rospy.Time(0))
-#    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-#        print ("No ORB Transform")
-#        return
+#    Try to get position from ORB
+    orbTrans = None
+    orbRot = None
+    orbPose = None
+    try:
+        (orbTrans, orbRot) = orbListener.lookupTransform ('ORB_SLAM/World', 'ORB_SLAM/ExtCamera', rospy.Time(0))
+        orbPose = Pose(times, orbTrans.x, orbPose.y)
+        print ("ORB Transform found")
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+        print ("No ORB Transform")
+        return
 #    print (orbTrans)
+    movement = {'time':times, 'left':msg.segway.left_wheel_velocity, 'right':msg.segway.right_wheel_velocity, 'yawRate':msg.segway.yaw_rate}
+    PF.update (movement, orbPose)
+    for i in range(numOfParticles):
+        particleStateList[i] = (PF.particles[i].state.x, PF.particles[i].state.y)
+    updated = True
+
     
     
 class PlotFigure (wx.Frame):
@@ -73,7 +127,7 @@ class PlotFigure (wx.Frame):
         self.robotPos, = self.ax.plot (self.data[:,0], self.data[:,1])
         if groundTruth != None:
             grnd = groundTruth.toArray(False)
-            self.groundPlot, self.ax.plot (grnd[:,0], grnd[:,1])
+            self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
         
         self.canvas.draw()
         
@@ -105,9 +159,10 @@ class PlotFigure (wx.Frame):
 if __name__ == '__main__':
     
     groundTruth = PoseTable.loadCsv('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run2-tf-ndt.csv')
+    PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel)
 
-    app = wx.PySimpleApp (groundTruth)
-    frame = PlotFigure ()
+    app = wx.PySimpleApp ()
+    frame = PlotFigure (groundTruth)
     tim = wx.Timer (frame, TIMER_ID)
     tim.Start(50)
     
