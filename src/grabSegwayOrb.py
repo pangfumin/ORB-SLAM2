@@ -10,17 +10,24 @@ import rospy
 from filter import ParticleFilter
 from segway_rmp.msg import SegwayStatusStamped
 import tf
-from orbndt import Pose
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+from orbndt import Pose, PoseTable
+from time import sleep
+import wx
+import numpy as np
+from matplotlib.figure import Figure, Axes
+from matplotlib.backends.backend_wxagg import \
+    FigureCanvasWxAgg as FigureCanvas
 
 
 robotPosition = Pose()
 orbListener = None
+updated = False
+TIMER_ID = wx.NewId ()
+
 
 
 def segwayOdomCallback (msg):
-    global robotPosition, orbListener
+    global robotPosition, orbListener, updated
     times = msg.header.stamp.to_sec()
     
     if robotPosition.timestamp==0:
@@ -34,7 +41,8 @@ def segwayOdomCallback (msg):
         msg.segway.right_wheel_velocity, 
         msg.segway.yaw_rate)
     robotPosition.timestamp = times
-    print (robotPosition.x, robotPosition.y)
+    updated = True
+#    print (robotPosition.x, robotPosition.y)
     
 #     Try to get position from ORB
 #    try:
@@ -45,48 +53,67 @@ def segwayOdomCallback (msg):
 #    print (orbTrans)
     
     
-class TrajectoryPlot (object):
-    def __init__ (self, pose):
-        self.figure, self.axes = plt.subplots()
-        self.axes.set_xlim(-100, 350)
-        self.axes.set_ylim(-100, 250)
-        self.axes.grid(True)
-        self.odomPlot, = self.axes.plot([], [])
-        self.data = []
-        self.pose = pose
-
-    def init (self):
-        self.odomPlot.set_data([], [])
-        return self.odomPlot,
+class PlotFigure (wx.Frame):
     
-    def __call__ (self, i):
-        if i==0:
-            return self.init()
-        if robotPosition.timestamp==0:
-            return self.odomPlot
-        self.data.append([robotPosition.x, robotPosition.y])
-        self.odomPlot.set_data(self.data)
-        return self.odomPlot,
+    def __init__ (self, groundTruth=None):
+        wx.Frame.__init__ (self, None, wx.ID_ANY, title="Trajectory")
+        
+        self.fig = Figure ()
+        self.canvas = FigureCanvas(self, wx.ID_ANY, self.fig)
+        self.ax = self.fig.add_subplot (111)
+        self.ax.set_xlim ([-100, 350])
+        self.ax.set_ylim ([-100, 250])
+        self.ax.set_autoscale_on (False)
+        
+        self.ax.grid(True)
+        
+        # Initial draw        
+        self.data = np.zeros((1,2))
+        # Please change
+        self.robotPos, = self.ax.plot (self.data[:,0], self.data[:,1])
+        if groundTruth != None:
+            grnd = groundTruth.toArray(False)
+            self.groundPlot, self.ax.plot (grnd[:,0], grnd[:,1])
+        
+        self.canvas.draw()
+        
+        # This must be done after all initial drawing
+        self.bg = self.canvas.copy_from_bbox (self.ax.bbox)
+        
+        # Bind events to timer function
+        wx.EVT_TIMER (self, TIMER_ID, self.onTimer)
+
+        
+    def onTimer (self, event):
+        global updated
+        """ Callback for event timer """
+        if updated==True:
+            self.canvas.restore_region(self.bg)
+            currentRow = self.data.shape[0]
+            self.data.resize ((currentRow+1, 2), refcheck=False)
+            self.data[currentRow, 0] = robotPosition.x
+            self.data[currentRow, 1] = robotPosition.y
+            self.robotPos.set_ydata(self.data[:,1])
+            self.robotPos.set_xdata(self.data[:,0])
+            self.ax.draw_artist(self.robotPos)
+            self.canvas.blit(self.ax.bbox)
+            updated = False
+            
+
 
 
 if __name__ == '__main__':
     
-    fig = plt.figure()
-    ax = plt.axes(xlim=(-100,350), ylim=(-100,250))
-    line, = ax.plot([], [])
-    
-    def plotInit ():
-        line.set_data([], [])
-        return line,
-        
-    def plotAnim (i):
-        return line,
-    
-    anim = FuncAnimation (fig, plotAnim, init_func=plotInit, interval=10)
-    plt.draw()
-    plt.show()
+    groundTruth = PoseTable.loadCsv('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run2-tf-ndt.csv')
+
+    app = wx.PySimpleApp (groundTruth)
+    frame = PlotFigure ()
+    tim = wx.Timer (frame, TIMER_ID)
+    tim.Start(50)
     
     rospy.init_node ('SegwayORB', anonymous=True)
     orbListener = tf.TransformListener()
     rospy.Subscriber('/segway_rmp_node/segway_status', SegwayStatusStamped, segwayOdomCallback)
-    rospy.spin()
+
+    frame.Show ()
+    app.MainLoop ()
