@@ -17,6 +17,7 @@ from matplotlib.figure import Figure, Axes
 from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigureCanvas
 import random
+from copy import copy
 
 
 robotPosition = Pose()
@@ -24,6 +25,7 @@ orbListener = None
 updated = False
 TIMER_ID = wx.NewId ()
 PF = None
+orbPosition = None
 
 # We should tune these parameters
 orbError = 4
@@ -53,11 +55,12 @@ def odoMotionModel(particleState, move):
     # vr = move['right] + random_vr
         
     x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
-    particleState.x = x
-    particleState.y = y
-    particleState.theta = theta
-    particleState.timestamp = move['time']
-    return particleState
+    newState = copy(particleState)
+    newState.x = x
+    newState.y = y
+    newState.theta = theta
+    newState.timestamp = move['time']
+    return newState
 
 def odoMeasurementModel(particleOdomState, orbPose):
     global orbError
@@ -76,7 +79,7 @@ def stateInitFunc ():
 
 
 def segwayOdomCallback (msg):
-    global robotPosition, orbListener, updated, PF, numOfParticles, particleStateList
+    global robotPosition, orbListener, updated, PF, numOfParticles, particleStateList, orbPosition
     times = msg.header.stamp.to_sec()
     
     if robotPosition.timestamp==0:
@@ -97,6 +100,7 @@ def segwayOdomCallback (msg):
     orbPose = None
     try:
         (orbTrans, orbRot) = orbListener.lookupTransform ('ORB_SLAM/World', 'ORB_SLAM/ExtCamera', rospy.Time(0))
+        orbPosition = copy(orbTrans)
 #        print (orbTrans)
         orbPose = Pose(times, orbTrans[0], orbTrans[1])
 #        print ("ORB Transform found")
@@ -131,6 +135,10 @@ class PlotFigure (wx.Frame):
             grnd = groundTruth.toArray(False)
             self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
         self.robotPos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=1)
+        if orbPosition != None:        
+            self.orbPos = self.ax.scatter(orbPosition[0], orbPosition[1], c=[[0,1,0,0.5]], s=100)
+        else:
+            self.orbPos = None
         self.canvas.draw()
         
         # This must be done after all initial drawing
@@ -147,6 +155,12 @@ class PlotFigure (wx.Frame):
             self.canvas.restore_region(self.bg)
             self.robotPos.set_offsets(particleStateList)
             self.ax.draw_artist(self.robotPos)
+            if orbPosition != None:
+                if self.orbPos == None:
+                    self.orbPos = self.ax.scatter(orbPosition[0], orbPosition[1], c=[[0,1,0,0.5]], s=100)
+                else:
+                    self.orbPos.set_offsets([orbPosition[0], orbPosition[1]])
+                self.ax.draw_artist(self.orbPos)
             self.canvas.blit(self.ax.bbox)
             
             updated = False

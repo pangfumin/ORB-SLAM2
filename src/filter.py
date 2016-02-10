@@ -45,6 +45,7 @@ class ParticleFilter:
     def update (self, control, observation=None):
         # Prediction
         for particle in self.particles:
+            # Motion model should return new copy of state
             particle.state = self.motion (particle.state, control)
             particle.swapState()
             
