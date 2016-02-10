@@ -97,8 +97,9 @@ def segwayOdomCallback (msg):
         print ("ORB Transform found")
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
         print ("No ORB Transform")
-        return
 #    print (orbTrans)
+    
+    # Update particle states
     movement = {'time':times, 'left':msg.segway.left_wheel_velocity, 'right':msg.segway.right_wheel_velocity, 'yawRate':msg.segway.yaw_rate}
     PF.update (movement, orbPose)
     for i in range(numOfParticles):
@@ -121,14 +122,10 @@ class PlotFigure (wx.Frame):
         
         self.ax.grid(True)
         
-        # Initial draw        
-        self.data = np.zeros((1,2))
-        # Please change
-        self.robotPos, = self.ax.plot (self.data[:,0], self.data[:,1])
         if groundTruth != None:
             grnd = groundTruth.toArray(False)
             self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
-        
+        self.robotPos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=10)
         self.canvas.draw()
         
         # This must be done after all initial drawing
@@ -143,14 +140,10 @@ class PlotFigure (wx.Frame):
         """ Callback for event timer """
         if updated==True:
             self.canvas.restore_region(self.bg)
-            currentRow = self.data.shape[0]
-            self.data.resize ((currentRow+1, 2), refcheck=False)
-            self.data[currentRow, 0] = robotPosition.x
-            self.data[currentRow, 1] = robotPosition.y
-            self.robotPos.set_ydata(self.data[:,1])
-            self.robotPos.set_xdata(self.data[:,0])
+            self.robotPos.set_offsets(particleStateList)
             self.ax.draw_artist(self.robotPos)
             self.canvas.blit(self.ax.bbox)
+            
             updated = False
             
 
