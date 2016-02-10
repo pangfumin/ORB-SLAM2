@@ -54,18 +54,18 @@ class ParticleFilter:
         # 1: Importance factor
         w_all = 0
         for particle in self.particles:
-            particle.w = self.measurement (particle.state, observation)
+            particle.w = self.measurement (particle.prevState, observation)
             w_all += particle.w
         # 2: Resampling
         r = random.random() / float(self.numOfParticles)
         i = 0
-        c = 0
+        c = self.particles[0].w / w_all
         for m in range(self.numOfParticles) :
             U = r + m / float(self.numOfParticles)
             while (U > c):
                 i+=1
                 c += self.particles[i].w / w_all
-            self.particles[m].state = self.particles[i].state
+            self.particles[m].state = self.particles[i].prevState
         for m in range(self.numOfParticles) :
             self.particles[m].swapState()
             

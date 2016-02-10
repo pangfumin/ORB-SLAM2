@@ -26,7 +26,7 @@ TIMER_ID = wx.NewId ()
 PF = None
 
 # We should tune these parameters
-orbError = 10.0
+orbError = 0.4
 numOfParticles = 250
 timeTolerance = 0.2
 WheelError = 0.3
@@ -62,7 +62,9 @@ def odoMeasurementModel(particleOdomState, orbPose):
     x = particleOdomState.x
     y = particleOdomState.y
     w = np.exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
-        ((y-orbPose.y)**2)/(2*orbError*orbError)))        
+        ((y-orbPose.y)**2)/(2*orbError*orbError)))
+    if w < 0.01:
+        w = 0.01
     return w
 
 def stateInitFunc ():
@@ -93,8 +95,9 @@ def segwayOdomCallback (msg):
     orbPose = None
     try:
         (orbTrans, orbRot) = orbListener.lookupTransform ('ORB_SLAM/World', 'ORB_SLAM/ExtCamera', rospy.Time(0))
-        orbPose = Pose(times, orbTrans.x, orbPose.y)
-        print ("ORB Transform found")
+#        print (orbTrans)
+        orbPose = Pose(times, orbTrans[0], orbTrans[1])
+#        print ("ORB Transform found")
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
         print ("No ORB Transform")
 #    print (orbTrans)
@@ -125,7 +128,7 @@ class PlotFigure (wx.Frame):
         if groundTruth != None:
             grnd = groundTruth.toArray(False)
             self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
-        self.robotPos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=10)
+        self.robotPos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=1)
         self.canvas.draw()
         
         # This must be done after all initial drawing
