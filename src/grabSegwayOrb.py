@@ -26,10 +26,11 @@ TIMER_ID = wx.NewId ()
 PF = None
 
 # We should tune these parameters
-orbError = 0.4
+orbError = 4
 numOfParticles = 250
 timeTolerance = 0.2
 WheelError = 0.3
+GyroError = 0.05
 particleStateList = np.zeros((numOfParticles, 2))
 
 
@@ -40,7 +41,7 @@ def nrand (num) :
     return r
     
 def odoMotionModel(particleState, move):
-    global WheelError
+    global WheelError, GyroError
     if particleState.timestamp==0:
         particleState.timestamp = move['time']
         return particleState
@@ -48,9 +49,10 @@ def odoMotionModel(particleState, move):
     # XXX: Add randomized component to left & right wheel velocity
     vl = move['left'] + nrand(WheelError)
     vr = move['right'] + nrand(WheelError)
+    yrate = -1*(move['yawRate']+0.011)*0.98 + nrand(GyroError)
     # vr = move['right] + random_vr
         
-    x, y, theta = particleState.segwayMove (move['time'], vl, vr, move['yawRate'])
+    x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
     particleState.x = x
     particleState.y = y
     particleState.theta = theta
