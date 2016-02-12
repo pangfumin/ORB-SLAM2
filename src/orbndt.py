@@ -394,6 +394,10 @@ class PoseTable :
             d = groundTruthTbl.lengthFrom2Times (bPose[0].timestamp, bPose[1].timestamp)
             blankDistMid += d
         return blankDistFront + blankDistMid + blankDistRear
+        
+
+    def saveToBag (self, bagFileName):
+        pass
             
             
     @staticmethod
