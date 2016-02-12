@@ -46,7 +46,7 @@ class ParticleFilter:
         # Prediction
         for particle in self.particles:
             # Motion model should return new copy of state
-            particle.state = self.motion (particle.state, control)
+            particle.state = self.motion (particle.prevState, control)
             particle.swapState()
             
         # Update
@@ -55,7 +55,7 @@ class ParticleFilter:
         # 1: Importance factor
         w_all = 0
         for particle in self.particles:
-            particle.w = self.measurement (particle.prevState, observation)
+            particle.w = self.measurement (particle.state, observation)
             w_all += particle.w
         # 2: Resampling
         r = random.random() / float(self.numOfParticles)

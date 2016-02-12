@@ -28,11 +28,11 @@ PF = None
 orbPosition = None
 
 # We should tune these parameters
-orbError = 4
+orbError = 10
 numOfParticles = 250
 timeTolerance = 0.2
-WheelError = 0.3
-GyroError = 0.05
+WheelError = 0.03
+GyroError = 0.2
 particleStateList = np.zeros((numOfParticles, 2))
 
 
@@ -49,16 +49,22 @@ def odoMotionModel(particleState, move):
         return particleState
     
     # XXX: Add randomized component to left & right wheel velocity
-    vl = move['left'] + nrand(WheelError)
-    vr = move['right'] + nrand(WheelError)
-    yrate = -1*(move['yawRate']+0.011)*0.98 + nrand(GyroError)
+
+#    vl = move['left']*(1 + nrand(WheelError))  
+    vl = move['left']*particleState.radius
+    vr = move['right']*particleState.radius
+#    vr = move['right']*(1 + nrand(WheelError))
+    yrate = -1*(move['yawRate']+particleState.gyro_offset)*0.98 + nrand(GyroError)
     # vr = move['right] + random_vr
         
     x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
+
     newState = copy(particleState)
     newState.x = x
     newState.y = y
     newState.theta = theta
+    newState.radius = particleState.radius+nrand(0.001)
+    newState.gyro_offset = particleState.gyro_offset+nrand(0.0001)
     newState.timestamp = move['time']
     return newState
 
@@ -74,7 +80,9 @@ def odoMeasurementModel(particleOdomState, orbPose):
 
 def stateInitFunc ():
     p = Pose(0)
-    p.theta = 0.0
+    p.theta = 0.5
+    p.radius = 1.0+nrand(0.1)
+    p.gyro_offset = 0.011+nrand(0.005)
     return p
 
 

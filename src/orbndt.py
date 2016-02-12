@@ -67,7 +67,7 @@ class Pose :
         dt = currentTimestamp - self.timestamp
         # XXX: May need to change this line 
         if abs(v) > minSpeed:
-            w = (yawRate+0.011)*0.98
+            w = yawRate   #(yawRate+0.011)*0.98
         else:
             w = 0.0
         
