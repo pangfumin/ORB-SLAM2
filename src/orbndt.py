@@ -396,8 +396,34 @@ class PoseTable :
         return blankDistFront + blankDistMid + blankDistRear
         
 
-    def saveToBag (self, bagFileName):
-        pass
+    def saveToBag (self, bagFileName, parentFrame, childFrame):
+        from tf2_msgs.msg import TFMessage
+        from std_msgs.msg import Header
+        from geometry_msgs.msg import Transform, TransformStamped, Vector3, Quaternion
+        import rosbag
+        
+        def create_tf_message (pose):
+            header = Header (stamp=rospy.Time(pose.timestamp))
+            tfmsg = TFMessage(transforms = [TransformStamped()])
+            tfmsg.transforms[0].header = copy(header)
+            tfmsg.transforms[0].header.frame_id = parentFrame
+            tfmsg.transforms[0].child_frame_id = childFrame
+            tfmsg.transforms[0].transform = Transform()
+            tfmsg.transforms[0].transform.translation = Vector3(pose.x, pose.y, pose.z)
+            tfmsg.transforms[0].transform.rotation = Quaternion(x=pose.qx, \
+                y=pose.qy, 
+                z=pose.qz, 
+                w=pose.qw)
+            return tfmsg
+
+        bagfile = rosbag.Bag(bagFileName, mode='w')
+        i = 0
+        for pose in self.table:
+            tfmsg = create_tf_message(pose)
+            bagfile.write('/tf', tfmsg, t=tfmsg.transforms[0].header.stamp)
+            print ("{} / {}".format(i, len(self.table)))
+            i+=1
+        bagfile.close()
             
             
     @staticmethod
@@ -619,8 +645,5 @@ def formatResultAsRecords (resultMat):
 
 
 if __name__ == '__main__' :
-    
-    segwayPoseMat = np.loadtxt('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/run0-segway-bak.csv')
-    orb1poses = PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run0-map1.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
-    orb2poses = PoseTable.loadFromBagFile('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run0-map3.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
-    joinOrbOdometry (orb1poses, orb2poses, segwayPoseMat)
+    jointmap = PoseTable.loadCsv('/home/sujiwo/Data/TsukubaChallenge/run2/jointPose-1_3.csv')
+    jointmap.saveToBag('/tmp/jointPose.bag', 'ORB_SLAM/World', 'ORB_SLAM/ExtCamera')
