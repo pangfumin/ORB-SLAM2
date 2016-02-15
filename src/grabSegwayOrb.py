@@ -29,12 +29,12 @@ PF = None
 orbPosition = None
 
 # We should tune these parameters
-orbError = 10
-numOfParticles = 250
+orbError =5.0
+numOfParticles = 500
 timeTolerance = 0.2
 WheelError = 0.03
 GyroError = 0.2
-particleStateList = np.zeros((numOfParticles, 4))
+particleStateList = np.zeros((numOfParticles, 5))
 particleAvgState = Pose()
 jointPoseBroadcast = None
 particleAverageList = []
@@ -55,8 +55,8 @@ def odoMotionModel(particleState, move):
     # XXX: Add randomized component to left & right wheel velocity
 
 #    vl = move['left']*(1 + nrand(WheelError))  
-    vl = move['left']*particleState.radius
-    vr = move['right']*particleState.radius
+    vl = move['left']*particleState.radius+ nrand(WheelError)
+    vr = move['right']*particleState.radius+ nrand(WheelError)
 #    vr = move['right']*(1 + nrand(WheelError))
     yrate = -1*(move['yawRate']+particleState.gyro_offset)*0.98 + nrand(GyroError)
     # vr = move['right] + random_vr
@@ -67,8 +67,8 @@ def odoMotionModel(particleState, move):
     newState.x = x
     newState.y = y
     newState.theta = theta
-    newState.radius = particleState.radius+nrand(0.001)
-    newState.gyro_offset = particleState.gyro_offset+nrand(0.0001)
+    newState.radius = particleState.radius+nrand(0.0001)
+    newState.gyro_offset = particleState.gyro_offset+nrand(0.00001)
     newState.timestamp = move['time']
     return newState
 
@@ -76,16 +76,32 @@ def odoMeasurementModel(particleOdomState, orbPose):
     global orbError
     x = particleOdomState.x
     y = particleOdomState.y
+    t = particleOdomState.theta
     w = np.exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
         ((y-orbPose.y)**2)/(2*orbError*orbError)))
     if w < 0.01:
         w = 0.01
     return w
+    
+    
+def odoMeasurementModel2 (particleOdomState, *orbPoses):
+    global orbError
+    x = particleOdomState.x
+    y = particleOdomState.y
+    ws = []
+    for pose in orbPoses:
+        wx = np.exp(-(((x-pose.x)**2)/(2*orbError*orbError) + 
+            ((y-pose.y)**2)/(2*orbError*orbError)))
+        ws.append(wx)
+    # XXX: Tweak this line to incorporate other type of probability selection
+    w = np.max(ws)
+    return w
+
 
 def stateInitFunc ():
-    p = Pose(0)
+    p = Pose(0, 3.6+nrand(0.5), 1.5+nrand(0.5))
     p.theta = 0.5
-    p.radius = 1.0+nrand(0.1)
+    p.radius = 1.0+nrand(0.05)
     p.gyro_offset = 0.011+nrand(0.005)
     return p
 
@@ -129,7 +145,12 @@ def segwayOdomCallback (msg):
 
     # XXX: In the particle state list, we ignore orientation aka. theta
     for i in range(numOfParticles):
-        particleStateList[i] = [PF.particles[i].state.x, PF.particles[i].state.y, PF.particles[i].state.theta, PF.particles[i].state.radius]
+        particleStateList[i] = [
+            PF.particles[i].state.x, 
+            PF.particles[i].state.y, 
+            PF.particles[i].state.theta, 
+            PF.particles[i].state.radius, 
+            PF.particles[i].state.gyro_offset]
 
     _avgState = np.insert(np.average(particleStateList, axis=0), 0, times)
     particleAverageList.append(_avgState)
