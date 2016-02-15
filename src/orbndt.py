@@ -100,6 +100,15 @@ class Pose :
         avgpose.z = sum(zs) / len(poses)
         avgpose.timestamp = np.average([p.timestamp for p in poses])
         return avgpose
+        
+    def publish (self, tfBroadCaster, frame1, frame2):
+        tfBroadCaster.sendTransform(
+            (self.x, self.y, self.z),
+            (self.qx, self.qy, self.qz, self.qw),
+            rospy.Time.from_sec(self.timestamp),
+            frame1, frame2
+        )
+        
 
 
 class PoseTable :

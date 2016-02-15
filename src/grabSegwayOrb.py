@@ -18,6 +18,7 @@ from matplotlib.backends.backend_wxagg import \
     FigureCanvasWxAgg as FigureCanvas
 import random
 from copy import copy
+import sys
 
 
 robotPosition = Pose()
@@ -33,7 +34,10 @@ numOfParticles = 250
 timeTolerance = 0.2
 WheelError = 0.03
 GyroError = 0.2
-particleStateList = np.zeros((numOfParticles, 2))
+particleStateList = np.zeros((numOfParticles, 4))
+particleAvgState = Pose()
+jointPoseBroadcast = None
+particleAverageList = []
 
 
 
@@ -87,7 +91,9 @@ def stateInitFunc ():
 
 
 def segwayOdomCallback (msg):
-    global robotPosition, orbListener, updated, PF, numOfParticles, particleStateList, orbPosition
+    global robotPosition, orbListener, updated, PF, numOfParticles, \
+        particleStateList, orbPosition, particleAvgState, jointPoseBroadcast, particleAverageList
+    
     times = msg.header.stamp.to_sec()
     
     if robotPosition.timestamp==0:
@@ -113,14 +119,23 @@ def segwayOdomCallback (msg):
         orbPose = Pose(times, orbTrans[0], orbTrans[1])
 #        print ("ORB Transform found")
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-        print ("No ORB Transform")
+#        print ("No ORB Transform")
+        pass
 #    print (orbTrans)
     
     # Update particle states
     movement = {'time':times, 'left':msg.segway.left_wheel_velocity, 'right':msg.segway.right_wheel_velocity, 'yawRate':msg.segway.yaw_rate}
     PF.update (movement, orbPose)
+
+    # XXX: In the particle state list, we ignore orientation aka. theta
     for i in range(numOfParticles):
-        particleStateList[i] = (PF.particles[i].state.x, PF.particles[i].state.y)
+        particleStateList[i] = [PF.particles[i].state.x, PF.particles[i].state.y, PF.particles[i].state.theta, PF.particles[i].state.radius]
+
+    _avgState = np.insert(np.average(particleStateList, axis=0), 0, times)
+    particleAverageList.append(_avgState)
+    particleAvgState = Pose(times, _avgState[1], _avgState[2])
+#    particleAvgState.publish(jointPoseBroadcast, 'ORB_SLAM/World', 'ORB_SLAM/Joint')
+#    particleAvgState.publish
     updated = True
 
     
@@ -142,7 +157,8 @@ class PlotFigure (wx.Frame):
         if groundTruth != None:
             grnd = groundTruth.toArray(False)
             self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
-        self.robotPos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=1)
+        self.particlePos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=1)
+        self.robotPos = self.ax.scatter(0, 0, c='r')
         if orbPosition != None:        
             self.orbPos = self.ax.scatter(orbPosition[0], orbPosition[1], c=[[0,1,0,0.5]], s=100)
         else:
@@ -159,9 +175,12 @@ class PlotFigure (wx.Frame):
     def onTimer (self, event):
         global updated
         """ Callback for event timer """
+
         if updated==True:
             self.canvas.restore_region(self.bg)
-            self.robotPos.set_offsets(particleStateList)
+            self.particlePos.set_offsets(particleStateList[:,0:2])
+            self.ax.draw_artist(self.particlePos)
+            self.robotPos.set_offsets([particleAvgState.x, particleAvgState.y])
             self.ax.draw_artist(self.robotPos)
             if orbPosition != None:
                 if self.orbPos == None:
@@ -172,7 +191,6 @@ class PlotFigure (wx.Frame):
             self.canvas.blit(self.ax.bbox)
             
             updated = False
-            
 
 
 
@@ -180,6 +198,7 @@ if __name__ == '__main__':
     
     groundTruth = PoseTable.loadCsv('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run2-tf-ndt.csv')
     PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel)
+    jointPoseBroadcast = tf.TransformBroadcaster()
 
     app = wx.PySimpleApp ()
     frame = PlotFigure (groundTruth)
@@ -192,3 +211,6 @@ if __name__ == '__main__':
 
     frame.Show ()
     app.MainLoop ()
+    
+    print ("Quit, saving...")
+    np.savetxt('/tmp/particleavg.csv', particleAverageList)
