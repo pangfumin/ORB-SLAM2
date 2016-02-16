@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from math import cos, sin, tan, exp
 from filter import ParticleFilter, nrand
+from tf import transformations as trafo
 
 
 ndtFName = '/home/sujiwo/ORB_SLAM/Data/20151106-1/ndt.csv'
@@ -108,7 +109,10 @@ class Pose :
             rospy.Time.from_sec(self.timestamp),
             frame1, frame2
         )
-        
+
+    # Output euler angle in order of: Roll, Pitch, Yaw
+    def euler (self):
+        return np.array(trafo.euler_from_quaternion([self.qx, self.qy, self.qz, self.qw]))
 
 
 class PoseTable :
@@ -651,6 +655,16 @@ def formatResultAsRecords (resultMat):
         pose = Pose(resultMat[r][1:])
         records[id] = pose
     return records
+
+
+def flipOrbToNdt (orbPose):
+    qOrb = [orbPose.qx, orbPose.qy, orbPose.qz, orbPose.qw]
+    orbFlip = trafo.concatenate_matrices(
+        trafo.quaternion_matrix(qOrb),
+        trafo.rotation_matrix(np.pi/2, (1,0,0)),
+        trafo.rotation_matrix(np.pi/2, (0,0,1))
+    )
+    return trafo.quaternion_from_matrix(orbFlip)
 
 
 if __name__ == '__main__' :

@@ -29,11 +29,12 @@ PF = None
 orbPosition = None
 
 # We should tune these parameters
-orbError =5.0
-numOfParticles = 500
+orbError = 0.5
+orbYawError = 15* np.pi/180
+numOfParticles = 250
 timeTolerance = 0.2
 WheelError = 0.03
-GyroError = 0.2
+GyroError = 0.5
 particleStateList = np.zeros((numOfParticles, 5))
 particleAvgState = Pose()
 jointPoseBroadcast = None
@@ -58,7 +59,7 @@ def odoMotionModel(particleState, move):
     vl = move['left']*particleState.radius+ nrand(WheelError)
     vr = move['right']*particleState.radius+ nrand(WheelError)
 #    vr = move['right']*(1 + nrand(WheelError))
-    yrate = -1*(move['yawRate']+particleState.gyro_offset)*0.98 + nrand(GyroError)
+    yrate = -1*(move['yawRate']+particleState.gyro_offset) + nrand(GyroError)
     # vr = move['right] + random_vr
         
     x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
@@ -68,19 +69,28 @@ def odoMotionModel(particleState, move):
     newState.y = y
     newState.theta = theta
     newState.radius = particleState.radius+nrand(0.0001)
-    newState.gyro_offset = particleState.gyro_offset+nrand(0.00001)
+    newState.gyro_offset = particleState.gyro_offset#+nrand(0.00001)
     newState.timestamp = move['time']
     return newState
 
 def odoMeasurementModel(particleOdomState, orbPose):
-    global orbError
+    global orbError, orbYawError
+    
     x = particleOdomState.x
     y = particleOdomState.y
     t = particleOdomState.theta
+    orbYaw = orbPose.euler()[2]
+    diff = t-orbYaw
+    if diff>np.pi:
+        diff = diff - 2*np.pi
+    if diff<-np.pi:
+        diff = diff + 2*np.pi
     w = np.exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
-        ((y-orbPose.y)**2)/(2*orbError*orbError)))
-    if w < 0.01:
-        w = 0.01
+        ((y-orbPose.y)**2)/(2*orbError*orbError) +
+        (diff**2)/(2*orbYawError*orbYawError)
+        ))
+    if w < 1e-8:
+        w = 1e-8
     return w
     
     
@@ -102,13 +112,22 @@ def stateInitFunc ():
     p = Pose(0, 3.6+nrand(0.5), 1.5+nrand(0.5))
     p.theta = 0.5
     p.radius = 1.0+nrand(0.05)
-    p.gyro_offset = 0.011+nrand(0.005)
+    p.gyro_offset = 0.0114#+nrand(0.005)
     return p
+
+
+msgBucket = []
+msgBucketMax = 10
+
+orbLastTimeFix = -1
+orbTimeTolerance = 1.0
 
 
 def segwayOdomCallback (msg):
     global robotPosition, orbListener, updated, PF, numOfParticles, \
-        particleStateList, orbPosition, particleAvgState, jointPoseBroadcast, particleAverageList
+        particleStateList, orbPosition, particleAvgState, jointPoseBroadcast, particleAverageList, \
+        msgBucket, msgBucketMax, \
+        orbLastTimeFix, orbTimeTolerance
     
     times = msg.header.stamp.to_sec()
     
@@ -116,6 +135,10 @@ def segwayOdomCallback (msg):
         robotPosition.timestamp = times
         robotPosition.theta = 0.0
         return
+        
+#    if len(msgBucket < msgBucketMax):
+#        msgBucket.append([msg.segway.left_wheel_velocity, msg.segway.right_wheel_velocity])
+        
     robotPosition.x, \
     robotPosition.y, \
     robotPosition.theta = robotPosition.segwayMove(times, 
@@ -129,15 +152,28 @@ def segwayOdomCallback (msg):
     orbRot = None
     orbPose = None
     try:
-        (orbTrans, orbRot) = orbListener.lookupTransform ('ORB_SLAM/World', 'ORB_SLAM/ExtCamera', rospy.Time(0))
+        
+        # XXX: Need to verify ORB pose value as valid (no later than orbTimeTolerance)
+        
+        (orbTrans, orbRot) = orbListener.lookupTransform ('ORB_SLAM/World', 'ORB_SLAM/Camera1', rospy.Time(0))
         orbPosition = copy(orbTrans)
-#        print (orbTrans)
-        orbPose = Pose(times, orbTrans[0], orbTrans[1])
-#        print ("ORB Transform found")
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-#        print ("No ORB Transform")
+        orbPose = Pose(times, orbTrans[0], orbTrans[1], orbTrans[2], orbRot[0], orbRot[1], orbRot[2], orbRot[3])
+        if orbLastTimeFix < 0:
+            orbLastTimeFix = rospy.Time.now().to_sec()
+        else :
+            ct = rospy.Time.now().to_sec()
+            if (abs(ct - orbLastTimeFix) > orbTimeTolerance) :
+                # discard ORB
+                orbTrans = None
+                orbRot = None
+                orbPose = None
+                raise Exception
+            else:
+                orbLastTimeFix = ct
+            
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, Exception):
+        print ("ORB Lost Tracking")
         pass
-#    print (orbTrans)
     
     # Update particle states
     movement = {'time':times, 'left':msg.segway.left_wheel_velocity, 'right':msg.segway.right_wheel_velocity, 'yawRate':msg.segway.yaw_rate}
@@ -154,6 +190,26 @@ def segwayOdomCallback (msg):
 
     _avgState = np.insert(np.average(particleStateList, axis=0), 0, times)
     particleAverageList.append(_avgState)
+    # 0 : timestamp
+    # 1 : X
+    # 2 : Y
+    # 3 : Yaw (theta)
+    # 4 : wheel radius
+    # 5 : Gyro offset
+    
+    # Yaw was previously in radian
+#    yaw = _avgState[3]
+#    yaw = yaw*180/np.pi
+#    if (yaw > 0):
+#        yaw = yaw % 360.0
+#    else :
+#        yaw = - (abs(yaw) % 360)
+#    if orbPose != None:
+#        eangle = orbPose.euler() * 180.0/np.pi
+#    else:
+#        eangle = [0, 0, 0]
+#    print ("Odo Yaw = {} degrees, ORB Yaw = {} degrees".format(yaw, str(eangle)))
+    
     particleAvgState = Pose(times, _avgState[1], _avgState[2])
 #    particleAvgState.publish(jointPoseBroadcast, 'ORB_SLAM/World', 'ORB_SLAM/Joint')
 #    particleAvgState.publish
