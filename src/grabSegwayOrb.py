@@ -19,6 +19,7 @@ from matplotlib.backends.backend_wxagg import \
 import random
 from copy import copy
 import sys
+import multiprocessing.dummy as mp
 
 
 robotPosition = Pose()
@@ -39,7 +40,8 @@ particleStateList = np.zeros((numOfParticles, 5))
 particleAvgState = Pose()
 jointPoseBroadcast = None
 particleAverageList = []
-
+orbProcess1 = None
+orbProcess2 = None
 
 
     
@@ -80,14 +82,15 @@ def odoMeasurementModel(particleOdomState, orbPose):
     y = particleOdomState.y
     t = particleOdomState.theta
     orbYaw = orbPose.euler()[2]
-    diff = t-orbYaw
-    if diff>np.pi:
-        diff = diff - 2*np.pi
-    if diff<-np.pi:
-        diff = diff + 2*np.pi
+    angleDiff = t-orbYaw
+    if angleDiff > np.pi:
+        angleDiff = angleDiff - 2*np.pi
+    if angleDiff < -np.pi:
+        angleDiff = angleDiff + 2*np.pi
     w = np.exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
         ((y-orbPose.y)**2)/(2*orbError*orbError) +
-        (diff**2)/(2*orbYawError*orbYawError)
+        (angleDiff
+        **2)/(2*orbYawError*orbYawError)
         ))
     if w < 1e-8:
         w = 1e-8
@@ -100,12 +103,14 @@ def odoMeasurementModel2 (particleOdomState, *orbPoses):
     y = particleOdomState.y
     ws = []
     for pose in orbPoses:
+        if pose==None:
+            continue
         wx = np.exp(-(((x-pose.x)**2)/(2*orbError*orbError) + 
             ((y-pose.y)**2)/(2*orbError*orbError)))
         ws.append(wx)
     # XXX: Tweak this line to incorporate other type of probability selection
     w = np.max(ws)
-    return w
+    return max(w, 1e-8)
 
 
 def stateInitFunc ():
@@ -125,9 +130,10 @@ orbTimeTolerance = 0.25
 
 def segwayOdomCallback (msg):
     global robotPosition, orbListener, updated, PF, numOfParticles, \
-        particleStateList, orbPosition, particleAvgState, jointPoseBroadcast, particleAverageList, \
+        particleStateList, particleAvgState, jointPoseBroadcast, particleAverageList, \
         msgBucket, msgBucketMax, \
-        orbLastTimeFix, orbTimeTolerance
+        orbLastTimeFix, orbTimeTolerance, \
+        orbProcess1, orbProcess2
     
     times = msg.header.stamp.to_sec()
     
@@ -148,34 +154,7 @@ def segwayOdomCallback (msg):
     robotPosition.timestamp = times
     
 #    Try to get position from ORB
-    orbTrans = None
-    orbRot = None
-    orbPose = None
-    try:
-        
-        # XXX: Need to verify ORB pose value as valid (no later than orbTimeTolerance)
-        
-        (orbTrans, orbRot) = orbListener.lookupTransform ('ORB_SLAM/World', 'ORB_SLAM/Camera1', rospy.Time(0))
-        orbPosition = copy(orbTrans)
-        orbPose = Pose(times, orbTrans[0], orbTrans[1], orbTrans[2], orbRot[0], orbRot[1], orbRot[2], orbRot[3])
-        if orbLastTimeFix < 0:
-            orbLastTimeFix = rospy.Time.now().to_sec()
-        else :
-            ct = rospy.Time.now().to_sec()
-            td = ct - orbLastTimeFix
-#            mprint ("TDif:{}, tolerance:{}".format(td, orbTimeTolerance))
-            if (abs(td) > orbTimeTolerance) :
-                # discard ORB
-                orbTrans = None
-                orbRot = None
-                orbPose = None
-                raise Exception
-            else:
-                orbLastTimeFix = ct
-            
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, Exception):
-        print ("ORB Lost Tracking")
-        pass
+    orbPose = orbProcess1.getPose()
     
     # Update particle states
     movement = {'time':times, 'left':msg.segway.left_wheel_velocity, 'right':msg.segway.right_wheel_velocity, 'yawRate':msg.segway.yaw_rate}
@@ -216,9 +195,52 @@ def segwayOdomCallback (msg):
 #    particleAvgState.publish(jointPoseBroadcast, 'ORB_SLAM/World', 'ORB_SLAM/Joint')
 #    particleAvgState.publish
     updated = True
+    
+    
+class OrbCollector:
+    def __init__ (self, parentFrameId, childFrameId, tfListener):
+        self.listener = tfListener
+        self.parentFrameId = parentFrameId
+        self.childFrameId = childFrameId
+        # Time delay before timeout
+        self.timeTolerance = 0.1
+        self.translation = np.zeros(3)
+        self.rotation = np.zeros(4)
+        self.time = -1
+        self.stop = False
+        self.process = mp.Process(target=self.start)
+        self.process.start()
 
-    
-    
+        
+    def getPose (self):
+        if self.time == -1:
+            return None
+        return Pose(self.time, \
+            self.translation[0], self.translation[1], self.translation[2], \
+            self.rotation[0], self.rotation[1], self.rotation[2], self.rotation[3])
+
+
+    def start (self):
+        print ("{} started".format(self.childFrameId))
+        while (self.stop != True):
+            try:
+                tm = rospy.Time.now()
+#                print ("Trying lookup")
+                self.listener.waitForTransform (self.parentFrameId, self.childFrameId, tm, rospy.Duration(self.timeTolerance))
+                (trans, rot) = self.listener.lookupTransform (self.parentFrameId, self.childFrameId, tm)
+#                print ("Got ORB for {}".format(self.childFrameId))
+                self.time = tm.to_sec()
+                self.translation[0] = trans[0]
+                self.translation[1] = trans[1]
+                self.translation[2] = trans[2]
+                self.rotation[0] = rot[0]
+                self.rotation[1] = rot[1]
+                self.rotation[2] = rot[2]
+                self.rotation[3] = rot[3]
+            except Exception:
+                self.time = -1
+
+
 class PlotFigure (wx.Frame):
     
     def __init__ (self, groundTruth=None):
@@ -230,7 +252,8 @@ class PlotFigure (wx.Frame):
         self.ax.set_xlim ([-100, 350])
         self.ax.set_ylim ([-100, 250])
         self.ax.set_autoscale_on (False)
-        
+        self.orbPos1 = None
+        self.orbPos2 = None
         self.ax.grid(True)
         
         if groundTruth != None:
@@ -238,10 +261,6 @@ class PlotFigure (wx.Frame):
             self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
         self.particlePos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=1)
         self.robotPos = self.ax.scatter(0, 0, c='r')
-        if orbPosition != None:        
-            self.orbPos = self.ax.scatter(orbPosition[0], orbPosition[1], c=[[0,1,0,0.5]], s=100)
-        else:
-            self.orbPos = None
         self.canvas.draw()
         
         # This must be done after all initial drawing
@@ -261,15 +280,45 @@ class PlotFigure (wx.Frame):
             self.ax.draw_artist(self.particlePos)
             self.robotPos.set_offsets([particleAvgState.x, particleAvgState.y])
             self.ax.draw_artist(self.robotPos)
-            if orbPosition != None:
-                if self.orbPos == None:
-                    self.orbPos = self.ax.scatter(orbPosition[0], orbPosition[1], c=[[0,1,0,0.5]], s=100)
-                else:
-                    self.orbPos.set_offsets([orbPosition[0], orbPosition[1]])
-                self.ax.draw_artist(self.orbPos)
-            self.canvas.blit(self.ax.bbox)
             
+            orbPosition1 = orbProcess1.getPose()
+            orbPosition2 = orbProcess2.getPose()
+            if orbPosition1 != None:
+                if self.orbPos1 == None:
+                    self.orbPos1 = self.ax.scatter(orbPosition1.x, orbPosition1.y, c=[[0,1,0,0.5]], s=100, linewidths=0)
+                else:
+                    self.orbPos1.set_offsets([orbPosition1.x, orbPosition1.y])
+                self.ax.draw_artist(self.orbPos1)
+            if orbPosition2 != None:
+                if self.orbPos2 == None:
+                    self.orbPos2 = self.ax.scatter(orbPosition2.x, orbPosition2.y, c=[[0,0,1,0.5]], s=100, linewidths=0)
+                else:
+                    self.orbPos2.set_offsets([orbPosition2.x, orbPosition2.y])
+                self.ax.draw_artist(self.orbPos2)
+
+
+            self.canvas.blit(self.ax.bbox)
             updated = False
+
+
+
+#if __name__ == '__main__' :
+#    import time
+#    
+#    rospy.init_node('SegwayORB', anonymous=True)
+#    tfListener = tf.TransformListener()
+#    
+#    orbProcess1 = OrbCollector('ORB_SLAM/World', 'ORB_SLAM/Camera1', tfListener)
+#    orbProcess2 = OrbCollector('ORB_SLAM/World', 'ORB_SLAM/Camera2', tfListener)
+#    
+#    while (True):
+#        cam1 = orbProcess1.getPose()
+#        cam2 = orbProcess2.getPose()
+#        if (cam1 != None):
+#            print ("Camera 1: {}".format(str(cam1)))
+#        if (cam2 != None):
+#            print ("Camera 2: {}".format(str(cam2)))
+#        time.sleep (0.1)
 
 
 
@@ -286,10 +335,16 @@ if __name__ == '__main__':
     
     rospy.init_node ('SegwayORB', anonymous=True)
     orbListener = tf.TransformListener()
+    
+    orbProcess1 = OrbCollector ('ORB_SLAM/World', 'ORB_SLAM/Camera1', orbListener)
+    orbProcess2 = OrbCollector ('ORB_SLAM/World', 'ORB_SLAM/Camera2', orbListener)
+    
     rospy.Subscriber('/segway_rmp_node/segway_status', SegwayStatusStamped, segwayOdomCallback, queue_size=1)
 
     frame.Show ()
     app.MainLoop ()
     
+    orbProcess1.stop = True
+    orbProcess2.stop = True
     print ("Quit, saving...")
     np.savetxt('/tmp/particleavg.csv', particleAverageList)
