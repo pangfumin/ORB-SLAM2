@@ -120,7 +120,7 @@ msgBucket = []
 msgBucketMax = 10
 
 orbLastTimeFix = -1
-orbTimeTolerance = 1.0
+orbTimeTolerance = 0.25
 
 
 def segwayOdomCallback (msg):
@@ -162,7 +162,9 @@ def segwayOdomCallback (msg):
             orbLastTimeFix = rospy.Time.now().to_sec()
         else :
             ct = rospy.Time.now().to_sec()
-            if (abs(ct - orbLastTimeFix) > orbTimeTolerance) :
+            td = ct - orbLastTimeFix
+#            mprint ("TDif:{}, tolerance:{}".format(td, orbTimeTolerance))
+            if (abs(td) > orbTimeTolerance) :
                 # discard ORB
                 orbTrans = None
                 orbRot = None
@@ -284,7 +286,7 @@ if __name__ == '__main__':
     
     rospy.init_node ('SegwayORB', anonymous=True)
     orbListener = tf.TransformListener()
-    rospy.Subscriber('/segway_rmp_node/segway_status', SegwayStatusStamped, segwayOdomCallback)
+    rospy.Subscriber('/segway_rmp_node/segway_status', SegwayStatusStamped, segwayOdomCallback, queue_size=1)
 
     frame.Show ()
     app.MainLoop ()
