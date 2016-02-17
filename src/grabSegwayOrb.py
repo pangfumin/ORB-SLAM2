@@ -89,8 +89,7 @@ def odoMeasurementModel(particleOdomState, orbPose):
         angleDiff = angleDiff + 2*np.pi
     w = np.exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
         ((y-orbPose.y)**2)/(2*orbError*orbError) +
-        (angleDiff
-        **2)/(2*orbYawError*orbYawError)
+        (angleDiff**2)/(2*orbYawError*orbYawError)
         ))
     if w < 1e-8:
         w = 1e-8
@@ -98,16 +97,30 @@ def odoMeasurementModel(particleOdomState, orbPose):
     
     
 def odoMeasurementModel2 (particleOdomState, *orbPoses):
-    global orbError
+    global orbError, orbYawError
+    
     x = particleOdomState.x
     y = particleOdomState.y
+    t = particleOdomState.theta
     ws = []
+
     for pose in orbPoses:
         if pose==None:
             continue
+
+        orbYaw = pose.euler()[2]
+        angleDiff = t-orbYaw
+        if angleDiff > np.pi:
+            angleDiff = angleDiff - 2*np.pi
+        if angleDiff < -np.pi:
+            angleDiff = angleDiff + 2*np.pi
+
         wx = np.exp(-(((x-pose.x)**2)/(2*orbError*orbError) + 
-            ((y-pose.y)**2)/(2*orbError*orbError)))
+            ((y-pose.y)**2)/(2*orbError*orbError) +
+            (angleDiff**2)/(2*orbYawError*orbYawError)
+            ))
         ws.append(wx)
+
     # XXX: Tweak this line to incorporate other type of probability selection
     w = np.max(ws)
     return max(w, 1e-8)
@@ -154,11 +167,15 @@ def segwayOdomCallback (msg):
     robotPosition.timestamp = times
     
 #    Try to get position from ORB
-    orbPose = orbProcess1.getPose()
+    orbPose1 = orbProcess1.getPose()
+    orbPose2 = orbProcess2.getPose()
     
     # Update particle states
     movement = {'time':times, 'left':msg.segway.left_wheel_velocity, 'right':msg.segway.right_wheel_velocity, 'yawRate':msg.segway.yaw_rate}
-    PF.update (movement, orbPose)
+    if (orbPose1==None and orbPose2==None):
+        PF.update (movement)
+    else:
+        PF.update (movement, orbPose1, orbPose2)
 
     # XXX: In the particle state list, we ignore orientation aka. theta
     for i in range(numOfParticles):
@@ -325,7 +342,7 @@ class PlotFigure (wx.Frame):
 if __name__ == '__main__':
     
     groundTruth = PoseTable.loadCsv('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run2-tf-ndt.csv')
-    PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel)
+    PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel2)
     jointPoseBroadcast = tf.TransformBroadcaster()
 
     app = wx.PySimpleApp ()
