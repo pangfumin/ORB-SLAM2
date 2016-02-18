@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
 """
 Created on Mon Feb  8 13:14:56 2016
@@ -36,6 +38,8 @@ numOfParticles = 250
 timeTolerance = 0.2
 WheelError = 0.03
 GyroError = 0.5
+
+# Runtime values
 particleStateList = np.zeros((numOfParticles, 5))
 particleAvgState = Pose()
 jointPoseBroadcast = None
@@ -43,6 +47,11 @@ particleAverageList = []
 orbProcess1 = None
 orbProcess2 = None
 
+# For Run 1
+#odomInitState = {'x':3.6, 'y':1.5, 'theta': 0.5}
+
+# For Run 2
+odomInitState = {'x':0, 'y':-0.5, 'theta':0.5}
 
     
 def nrand (num) :
@@ -127,8 +136,10 @@ def odoMeasurementModel2 (particleOdomState, *orbPoses):
 
 
 def stateInitFunc ():
-    p = Pose(0, 3.6+nrand(0.5), 1.5+nrand(0.5))
-    p.theta = 0.5
+    global odomInitState
+    
+    p = Pose(0, odomInitState['x']+nrand(0.5), odomInitState['y']+nrand(0.5))
+    p.theta = odomInitState['theta']
     p.radius = 1.0+nrand(0.05)
     p.gyro_offset = 0.0114#+nrand(0.005)
     return p
@@ -277,7 +288,7 @@ class PlotFigure (wx.Frame):
             grnd = groundTruth.toArray(False)
             self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
         self.particlePos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=1)
-        self.robotPos = self.ax.scatter(0, 0, c='r')
+        self.robotPos = self.ax.scatter(odomInitState['x'], odomInitState['y'], c='r', linewidths=0)
         self.canvas.draw()
         
         # This must be done after all initial drawing
@@ -341,7 +352,15 @@ class PlotFigure (wx.Frame):
 
 if __name__ == '__main__':
     
-    groundTruth = PoseTable.loadCsv('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run2-tf-ndt.csv')
+    from sys import argv
+    
+#    groundTruth = PoseTable.loadCsv('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run2-tf-ndt.csv')
+    if (len(argv)<2):
+        print ('Enter ground truth table')
+        sys.exit(-1)
+
+    groundTruth = PoseTable.loadCsv(argv[1])
+    
     PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel2)
     jointPoseBroadcast = tf.TransformBroadcaster()
 
