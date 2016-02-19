@@ -48,10 +48,10 @@ orbProcess1 = None
 orbProcess2 = None
 
 # For Run 1
-#odomInitState = {'x':3.6, 'y':1.5, 'theta': 0.5}
+odomInitState = {'x':3.6, 'y':1.5, 'theta': 0.5}
 
 # For Run 2
-odomInitState = {'x':0, 'y':-0.5, 'theta':0.5}
+#odomInitState = {'x':0, 'y':-0.5, 'theta':0.5}
 
     
 def nrand (num) :
@@ -64,8 +64,6 @@ def odoMotionModel(particleState, move):
         particleState.timestamp = move['time']
         return particleState
     
-    # XXX: Add randomized component to left & right wheel velocity
-
 #    vl = move['left']*(1 + nrand(WheelError))  
     vl = move['left']*particleState.radius+ nrand(WheelError)
     vr = move['right']*particleState.radius+ nrand(WheelError)
@@ -137,8 +135,9 @@ def odoMeasurementModel2 (particleOdomState, *orbPoses):
 
 def stateInitFunc ():
     global odomInitState
+    initialPositionNoise = 0.1
     
-    p = Pose(0, odomInitState['x']+nrand(0.5), odomInitState['y']+nrand(0.5))
+    p = Pose(0, odomInitState['x']+nrand(initialPositionNoise), odomInitState['y']+nrand(initialPositionNoise))
     p.theta = odomInitState['theta']
     p.radius = 1.0+nrand(0.05)
     p.gyro_offset = 0.0114#+nrand(0.005)
