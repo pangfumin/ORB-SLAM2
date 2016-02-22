@@ -37,7 +37,7 @@ orbYawError = 15* np.pi/180
 numOfParticles = 250
 timeTolerance = 0.2
 WheelError = 0.03
-GyroError = 0.5
+GyroError = 0.3
 
 # Runtime values
 particleStateList = np.zeros((numOfParticles, 5))
@@ -48,10 +48,10 @@ orbProcess1 = None
 orbProcess2 = None
 
 # For Run 1
-odomInitState = {'x':3.6, 'y':1.5, 'theta': 0.5}
+#odomInitState = {'x':3.6, 'y':1.5, 'theta': 0.5}
 
 # For Run 2
-#odomInitState = {'x':0, 'y':-0.5, 'theta':0.5}
+odomInitState = {'x':6.09957265854, 'y':2.93271708488, 'theta':0.52038929}
 
     
 def nrand (num) :
@@ -306,7 +306,7 @@ class PlotFigure (wx.Frame):
             self.particlePos.set_offsets(particleStateList[:,0:2])
             self.ax.draw_artist(self.particlePos)
             self.robotPos.set_offsets([particleAvgState.x, particleAvgState.y])
-            self.ax.draw_artist(self.robotPos)
+            #self.ax.draw_artist(self.robotPos)
             
             orbPosition1 = orbProcess1.getPose()
             orbPosition2 = orbProcess2.getPose()
@@ -315,15 +315,15 @@ class PlotFigure (wx.Frame):
                     self.orbPos1 = self.ax.scatter(orbPosition1.x, orbPosition1.y, c=[[0,1,0,0.5]], s=100, linewidths=0)
                 else:
                     self.orbPos1.set_offsets([orbPosition1.x, orbPosition1.y])
-                self.ax.draw_artist(self.orbPos1)
+                #self.ax.draw_artist(self.orbPos1)
             if orbPosition2 != None:
                 if self.orbPos2 == None:
                     self.orbPos2 = self.ax.scatter(orbPosition2.x, orbPosition2.y, c=[[0,0,1,0.5]], s=100, linewidths=0)
                 else:
                     self.orbPos2.set_offsets([orbPosition2.x, orbPosition2.y])
-                self.ax.draw_artist(self.orbPos2)
+                #self.ax.draw_artist(self.orbPos2)
 
-
+            self.canvas.draw()
             self.canvas.blit(self.ax.bbox)
             updated = False
 
@@ -359,6 +359,9 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     groundTruth = PoseTable.loadCsv(argv[1])
+    robotPosition.x = odomInitState['x']
+    robotPosition.y = odomInitState['y']
+    robotPosition.theta = odomInitState['theta']
     
     PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel2)
     jointPoseBroadcast = tf.TransformBroadcaster()
