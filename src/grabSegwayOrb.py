@@ -34,10 +34,10 @@ orbPosition = None
 # We should tune these parameters
 orbError = 0.5
 orbYawError = 15* np.pi/180
-numOfParticles = 250
+numOfParticles = 500
 timeTolerance = 0.2
 WheelError = 0.03
-GyroError = 0.3
+GyroError = 0.5
 
 # Runtime values
 particleStateList = np.zeros((numOfParticles, 5))
@@ -72,8 +72,13 @@ def odoMotionModel(particleState, move):
     # vr = move['right] + random_vr
         
     x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
-
     newState = copy(particleState)
+    
+    # Suppress movement noise
+#    minDist = 0.005
+#    if (np.linalg.norm([particleState.x-x, particleState.y-y]) < minDist):
+#        return newState
+
     newState.x = x
     newState.y = y
     newState.theta = theta
@@ -139,7 +144,7 @@ def stateInitFunc ():
     
     p = Pose(0, odomInitState['x']+nrand(initialPositionNoise), odomInitState['y']+nrand(initialPositionNoise))
     p.theta = odomInitState['theta']
-    p.radius = 1.0+nrand(0.05)
+    p.radius = 1.0#+nrand(0.05)
     p.gyro_offset = 0.0114#+nrand(0.005)
     return p
 
@@ -151,18 +156,21 @@ orbLastTimeFix = -1
 orbTimeTolerance = 0.25
 
 
+particleLog = open('/tmp/particleavg.csv', 'w', 131072)
+
+
 def segwayOdomCallback (msg):
     global robotPosition, orbListener, updated, PF, numOfParticles, \
-        particleStateList, particleAvgState, jointPoseBroadcast, particleAverageList, \
+        particleStateList, particleAvgState, jointPoseBroadcast, \
         msgBucket, msgBucketMax, \
         orbLastTimeFix, orbTimeTolerance, \
-        orbProcess1, orbProcess2
+        orbProcess1, orbProcess2, \
+        particleLog
     
     times = msg.header.stamp.to_sec()
     
     if robotPosition.timestamp==0:
         robotPosition.timestamp = times
-        robotPosition.theta = 0.0
         return
         
 #    if len(msgBucket < msgBucketMax):
@@ -187,7 +195,6 @@ def segwayOdomCallback (msg):
     else:
         PF.update (movement, orbPose1, orbPose2)
 
-    # XXX: In the particle state list, we ignore orientation aka. theta
     for i in range(numOfParticles):
         particleStateList[i] = [
             PF.particles[i].state.x, 
@@ -197,13 +204,15 @@ def segwayOdomCallback (msg):
             PF.particles[i].state.gyro_offset]
 
     _avgState = np.insert(np.average(particleStateList, axis=0), 0, times)
-    particleAverageList.append(_avgState)
+    #particleAverageList.append(_avgState)
     # 0 : timestamp
     # 1 : X
     # 2 : Y
     # 3 : Yaw (theta)
     # 4 : wheel radius
     # 5 : Gyro offset
+    particleLog.write(" ".join([`n` for n in _avgState]))
+    particleLog.write("\n")
     
     # Yaw was previously in radian
 #    yaw = _avgState[3]
@@ -219,6 +228,7 @@ def segwayOdomCallback (msg):
 #    print ("Odo Yaw = {} degrees, ORB Yaw = {} degrees".format(yaw, str(eangle)))
     
     particleAvgState = Pose(times, _avgState[1], _avgState[2])
+    particleAvgState.theta = _avgState[3]
 #    particleAvgState.publish(jointPoseBroadcast, 'ORB_SLAM/World', 'ORB_SLAM/Joint')
 #    particleAvgState.publish
     updated = True
@@ -265,6 +275,8 @@ class OrbCollector:
                 self.rotation[2] = rot[2]
                 self.rotation[3] = rot[3]
             except Exception:
+                if self.time != -1:
+                    print ("{} lost".format(self.childFrameId))
                 self.time = -1
 
 
@@ -288,9 +300,12 @@ class PlotFigure (wx.Frame):
             self.groundPlot, = self.ax.plot (grnd[:,0], grnd[:,1])
         self.particlePos = self.ax.scatter(particleStateList[:,0], particleStateList[:,1], s=1)
         self.robotPos = self.ax.scatter(odomInitState['x'], odomInitState['y'], c='r', linewidths=0)
-        self.canvas.draw()
+        
+        self.odomRobotPos = self.ax.scatter(robotPosition.x, robotPosition.y, marker='D', s=1, c=[[0.59,0.29,0,0.5]], linewidths=0)
+        print (robotPosition.x, robotPosition.y, robotPosition.theta)
         
         # This must be done after all initial drawing
+        self.canvas.draw()
         self.bg = self.canvas.copy_from_bbox (self.ax.bbox)
         
         # Bind events to timer function
@@ -322,6 +337,9 @@ class PlotFigure (wx.Frame):
                 else:
                     self.orbPos2.set_offsets([orbPosition2.x, orbPosition2.y])
                 #self.ax.draw_artist(self.orbPos2)
+                    
+            self.odomRobotPos.set_offsets([robotPosition.x, robotPosition.y])
+            print (particleAvgState.x, particleAvgState.y, particleAvgState.theta)
 
             self.canvas.draw()
             self.canvas.blit(self.ax.bbox)
@@ -352,13 +370,15 @@ class PlotFigure (wx.Frame):
 if __name__ == '__main__':
     
     from sys import argv
+    from time import sleep
     
-#    groundTruth = PoseTable.loadCsv('/media/sujiwo/TsukubaChallenge/TsukubaChallenge/20151103/localizerResults/run2-tf-ndt.csv')
+#    groundTruth = PoseTable.loadCsv('/home/sujiwo/ORB_SLAM/Data/TsukubaChallenge/run2/GroundTruth.csv')
+
     if (len(argv)<2):
         print ('Enter ground truth table')
         sys.exit(-1)
-
     groundTruth = PoseTable.loadCsv(argv[1])
+    
     robotPosition.x = odomInitState['x']
     robotPosition.y = odomInitState['y']
     robotPosition.theta = odomInitState['theta']
@@ -377,12 +397,15 @@ if __name__ == '__main__':
     orbProcess1 = OrbCollector ('ORB_SLAM/World', 'ORB_SLAM/Camera1', orbListener)
     orbProcess2 = OrbCollector ('ORB_SLAM/World', 'ORB_SLAM/Camera2', orbListener)
     
-    rospy.Subscriber('/segway_rmp_node/segway_status', SegwayStatusStamped, segwayOdomCallback, queue_size=1)
+    segwayListen = rospy.Subscriber('/segway_rmp_node/segway_status', SegwayStatusStamped, segwayOdomCallback, queue_size=10)
 
     frame.Show ()
     app.MainLoop ()
     
     orbProcess1.stop = True
     orbProcess2.stop = True
-    print ("Quit, saving...")
-    np.savetxt('/tmp/particleavg.csv', particleAverageList)
+
+    del(segwayListen)
+    particleLog.flush()
+    sleep(0.5)
+    particleLog.close()

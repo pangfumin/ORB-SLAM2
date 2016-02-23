@@ -62,7 +62,7 @@ class Pose :
     # currentTimestamp must be in second
     def segwayMove (self, currentTimestamp, leftWheelVelocity, rightWheelVelocity, yawRate):
         # this is minimum speed to consider yaw changes (ie. yaw damping)
-        minSpeed = 5e-3        
+        minSpeed = 0.025        
         
         v = (leftWheelVelocity + rightWheelVelocity) / 2
         dt = currentTimestamp - self.timestamp
@@ -75,6 +75,7 @@ class Pose :
         x = self.x + v*cos(self.theta) * dt
         y = self.y + v*sin(self.theta) * dt
         theta = self.theta + w * dt
+
         return x, y, theta
         
     @staticmethod
@@ -113,7 +114,14 @@ class Pose :
     # Output euler angle in order of: Roll, Pitch, Yaw
     def euler (self):
         return np.array(trafo.euler_from_quaternion([self.qx, self.qy, self.qz, self.qw]))
+        
+    def setRPY (self, roll, pitch, yaw):
+        pass
 
+    def distance (self, pose):
+        return np.linalg.norm([self.x-pose.x, self.y-pose.y, self.z-pose.z])
+    
+    
 
 class PoseTable :
     def __init__ (self):
