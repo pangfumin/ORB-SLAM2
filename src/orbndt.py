@@ -261,9 +261,9 @@ class PoseTable :
     def plotMulti (*tables):
         pass
     
-    def plot (self, *columnList):
+    def plot (self, col1, col2, **kwargs):
         array = self.toArray()
-        return plt.plot(array[:,columnList[0]], array[:,columnList[1]])
+        return plt.plot(array[:,col1], array[:,col2], **kwargs)
         
     
     @staticmethod 
