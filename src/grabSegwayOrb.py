@@ -22,6 +22,7 @@ import random
 from copy import copy
 import sys
 import multiprocessing.dummy as mp
+from math import sin, cos, tan
 
 
 robotPosition = Pose()
@@ -34,10 +35,12 @@ orbPosition = None
 # We should tune these parameters
 orbError = 0.5
 orbYawError = 15* np.pi/180
-numOfParticles = 500
+numOfParticles = 250
 timeTolerance = 0.2
 WheelError = 0.03
 GyroError = 0.5
+TREAD = 0.542
+gyroOffset = 0.006
 
 # Runtime values
 particleStateList = np.zeros((numOfParticles, 5))
@@ -59,19 +62,29 @@ def nrand (num) :
     return r
     
 def odoMotionModel(particleState, move):
-    global WheelError, GyroError
+    global WheelError, GyroError, TREAD, gyroOffset
     if particleState.timestamp==0:
         particleState.timestamp = move['time']
         return particleState
     
-#    vl = move['left']*(1 + nrand(WheelError))  
-    vl = move['left']*particleState.radius+ nrand(WheelError)
-    vr = move['right']*particleState.radius+ nrand(WheelError)
-#    vr = move['right']*(1 + nrand(WheelError))
-    yrate = -1*(move['yawRate']+particleState.gyro_offset) + nrand(GyroError)
-    # vr = move['right] + random_vr
-        
-    x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
+#    vl = move['left']*particleState.radius+ nrand(WheelError)
+#    vr = move['right']*particleState.radius+ nrand(WheelError)
+#    yrate = -1*(move['yawRate']+particleState.gyro_offset) + nrand(GyroError)
+    # I don't know how to get these magic number. If we change to 1.0, the robot
+    # will always turn to right
+    vl = move['left'] * 1.004
+    vr = move['right'] * 0.996
+    yrate = -1*(move['yawRate']-gyroOffset) + nrand(0.1)
+    
+    v = (vr+vl)/2 + nrand(0.3)
+    w = (vr-vl)/TREAD + nrand(0.05)
+    dt = move['time'] - particleState.timestamp
+    
+#    x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
+    x = particleState.x + v*cos(particleState.theta)*dt
+    y = particleState.y + v*sin(particleState.theta)*dt
+    theta = particleState.theta + w*dt
+    
     newState = copy(particleState)
     
     # Suppress movement noise
@@ -87,28 +100,8 @@ def odoMotionModel(particleState, move):
     newState.timestamp = move['time']
     return newState
 
-def odoMeasurementModel(particleOdomState, orbPose):
-    global orbError, orbYawError
-    
-    x = particleOdomState.x
-    y = particleOdomState.y
-    t = particleOdomState.theta
-    orbYaw = orbPose.euler()[2]
-    angleDiff = t-orbYaw
-    if angleDiff > np.pi:
-        angleDiff = angleDiff - 2*np.pi
-    if angleDiff < -np.pi:
-        angleDiff = angleDiff + 2*np.pi
-    w = np.exp(-(((x-orbPose.x)**2)/(2*orbError*orbError) + 
-        ((y-orbPose.y)**2)/(2*orbError*orbError) +
-        (angleDiff**2)/(2*orbYawError*orbYawError)
-        ))
-    if w < 1e-8:
-        w = 1e-8
-    return w
-    
-    
-def odoMeasurementModel2 (particleOdomState, *orbPoses):
+
+def odoMeasurementModel (particleOdomState, *orbPoses):
     global orbError, orbYawError
     
     x = particleOdomState.x
@@ -149,9 +142,6 @@ def stateInitFunc ():
     return p
 
 
-msgBucket = []
-msgBucketMax = 10
-
 orbLastTimeFix = -1
 orbTimeTolerance = 0.25
 
@@ -162,7 +152,6 @@ particleLog = open('/tmp/particleavg.csv', 'w', 131072)
 def segwayOdomCallback (msg):
     global robotPosition, orbListener, updated, PF, numOfParticles, \
         particleStateList, particleAvgState, jointPoseBroadcast, \
-        msgBucket, msgBucketMax, \
         orbLastTimeFix, orbTimeTolerance, \
         orbProcess1, orbProcess2, \
         particleLog
@@ -172,9 +161,6 @@ def segwayOdomCallback (msg):
     if robotPosition.timestamp==0:
         robotPosition.timestamp = times
         return
-        
-#    if len(msgBucket < msgBucketMax):
-#        msgBucket.append([msg.segway.left_wheel_velocity, msg.segway.right_wheel_velocity])
         
     robotPosition.x, \
     robotPosition.y, \
@@ -213,19 +199,6 @@ def segwayOdomCallback (msg):
     # 5 : Gyro offset
     particleLog.write(" ".join([`n` for n in _avgState]))
     particleLog.write("\n")
-    
-    # Yaw was previously in radian
-#    yaw = _avgState[3]
-#    yaw = yaw*180/np.pi
-#    if (yaw > 0):
-#        yaw = yaw % 360.0
-#    else :
-#        yaw = - (abs(yaw) % 360)
-#    if orbPose != None:
-#        eangle = orbPose.euler() * 180.0/np.pi
-#    else:
-#        eangle = [0, 0, 0]
-#    print ("Odo Yaw = {} degrees, ORB Yaw = {} degrees".format(yaw, str(eangle)))
     
     particleAvgState = Pose(times, _avgState[1], _avgState[2])
     particleAvgState.theta = _avgState[3]
@@ -347,23 +320,15 @@ class PlotFigure (wx.Frame):
 
 
 
-#if __name__ == '__main__' :
-#    import time
-#    
-#    rospy.init_node('SegwayORB', anonymous=True)
-#    tfListener = tf.TransformListener()
-#    
-#    orbProcess1 = OrbCollector('ORB_SLAM/World', 'ORB_SLAM/Camera1', tfListener)
-#    orbProcess2 = OrbCollector('ORB_SLAM/World', 'ORB_SLAM/Camera2', tfListener)
-#    
-#    while (True):
-#        cam1 = orbProcess1.getPose()
-#        cam2 = orbProcess2.getPose()
-#        if (cam1 != None):
-#            print ("Camera 1: {}".format(str(cam1)))
-#        if (cam2 != None):
-#            print ("Camera 2: {}".format(str(cam2)))
-#        time.sleep (0.1)
+def processOffline (groundTruth, orbPoseTbl1, orbPoseTbl2, odometerBagFilename, window=None, orbTimeTolerance=0.1):
+    import rosbag
+    
+    odomBagfd = rosbag.Bag(odometerBagFilename, 'r')
+    for topic, msg, timestamp in odomBagfd.read_messages():
+        pass
+    
+    odomBagfd.close()
+
 
 
 
@@ -383,7 +348,7 @@ if __name__ == '__main__':
     robotPosition.y = odomInitState['y']
     robotPosition.theta = odomInitState['theta']
     
-    PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel2)
+    PF = ParticleFilter (numOfParticles, stateInitFunc, odoMotionModel, odoMeasurementModel)
     jointPoseBroadcast = tf.TransformBroadcaster()
 
     app = wx.PySimpleApp ()
