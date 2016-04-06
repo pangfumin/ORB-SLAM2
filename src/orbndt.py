@@ -121,6 +121,9 @@ class Pose :
     def distance (self, pose):
         return np.linalg.norm([self.x-pose.x, self.y-pose.y, self.z-pose.z])
     
+    def inverse (self):
+        (qx, qy, qz, qw) = np.array([-self.qx, -self.qy, -self.qz, self.qw]) / np.linalg.norm([self.qx, self.qy, self.qz, self.qw])
+        return Pose(self.timestamp, -self.x, -self.y, -self.z, qx, qy, qz, qw)
     
 
 class PoseTable :
@@ -389,6 +392,9 @@ class PoseTable :
             p = self.table[i]
             poseTblSubset.append(p)
         return poseTblSubset
+        
+    def transform (self, dpose):
+        pass
         
     def findBlankLengthFromGroundTruth (self, groundTruthTbl):
         tolerance = 0.25

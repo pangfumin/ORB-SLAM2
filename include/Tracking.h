@@ -98,6 +98,8 @@ public:
     void setMapLoaded ();
     bool localizationOnly;
 
+    bool useExternalLocalisation;
+
 protected:
     void ProcessImage(cv::Mat &img, double timestamp=0);
     void grabImageFromROS (const sensor_msgs::ImageConstPtr &msg);
@@ -198,7 +200,6 @@ protected:
     string imageTopic;
     bool isCompressed;
 
-    bool useExternalLocalisation;
     void externalLocalise (const tf::Transform &tfOrb, tf::Transform &tfExt);
 
 //    int mapState;

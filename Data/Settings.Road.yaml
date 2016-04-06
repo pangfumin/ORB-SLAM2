@@ -1,33 +1,34 @@
 %YAML:1.0
 
-# Camera Parameters. Adjust them!
+# Camera Parameters.
+# These settings apply when input are reduced to 800x600
 
 # Camera calibration parameters (OpenCV) 
-Camera.fx: 1091.671534
-Camera.fy: 1090.1017532
-Camera.cx: 957.443600
-Camera.cy: 754.458042
+Camera.fx: 479.570576946
+Camera.fy: 479.570576946
+Camera.cx: 411.879719484
+Camera.cy: 288.668313855
 
 # Camera distortion paremeters (OpenCV) --
-Camera.k1: -0.029837
-Camera.k2: 0.041883
-Camera.p1: -0.000148
-Camera.p2: 0.000194
+Camera.k1: 0
+Camera.k2: 0
+Camera.p1: 0
+Camera.p2: 0
 
 # Camera frames per second 
-Camera.fps: 25
+Camera.fps: 20
 
 # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
 Camera.RGB: 1
 
 Camera.topic: "/camera1/image_color"
-Camera.compressed: 0
+Camera.compressed: 1
 
 #--------------------------------------------------------------------------------------------
 ### Changing the parameters below could seriously degradate the performance of the system
 
 # ORB Extractor: Number of features per image
-ORBextractor.nFeatures: 1000
+ORBextractor.nFeatures: 3000
 
 # ORB Extractor: Scale factor between levels in the scale pyramid 	
 ORBextractor.scaleFactor: 1.2
@@ -36,7 +37,7 @@ ORBextractor.scaleFactor: 1.2
 ORBextractor.nLevels: 8
 
 # ORB Extractor: Fast threshold (lower less restrictive)			
-ORBextractor.fastTh: 20
+ORBextractor.fastTh: 16
 
 # ORB Extractor: Score to sort features. 0 -> Harris Score, 1 -> FAST Score			
 ORBextractor.nScoreType: 1
@@ -44,3 +45,8 @@ ORBextractor.nScoreType: 1
 
 # Constant Velocity Motion Model (0 - disabled, 1 - enabled [recommended])
 UseMotionModel: 1
+
+# Whether to use ``external localization''
+ExternalLocalization: 1
+ExternalLocalization.from: world
+ExternalLocalization.to: ndt_frame

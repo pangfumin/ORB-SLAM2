@@ -51,10 +51,10 @@ orbProcess1 = None
 orbProcess2 = None
 
 # For Run 1
-#odomInitState = {'x':3.6, 'y':1.5, 'theta': 0.5}
+odomInitState = {'x':3.6, 'y':1.5, 'theta': 0.5}
 
 # For Run 2
-odomInitState = {'x':6.09957265854, 'y':2.93271708488, 'theta':0.52038929}
+#odomInitState = {'x':6.09957265854, 'y':2.93271708488, 'theta':0.52038929}
 
     
 def nrand (num) :
@@ -99,6 +99,45 @@ def odoMotionModel(particleState, move):
     newState.gyro_offset = particleState.gyro_offset#+nrand(0.00001)
     newState.timestamp = move['time']
     return newState
+
+
+def odoMotionModel2 (particleState, move):
+    global WheelError, GyroError, TREAD, gyroOffset
+    if particleState.timestamp==0:
+        particleState.timestamp = move['time']
+        return particleState
+    
+    # I don't know how to get these magic number. If we change to 1.0, the robot
+    # will always turn to right
+    vl = move['left'] * 1.004 + nrand(0.001)
+    vr = move['right'] * 0.996 + nrand(0.001)
+
+    R = ((vl+vr) / (vr-vl))*(TREAD/2)
+    (Iccx, Iccy) = (particleState.x - R*sin(particleState.theta), particleState.y + R*cos(particleState.theta))
+    
+    w = (vr-vl)/TREAD + nrand(0.05)
+    dt = move['time'] - particleState.timestamp
+    
+#    x, y, theta = particleState.segwayMove (move['time'], vl, vr, yrate)
+    x = cos(w*dt)*(particleState.x-Iccx) - sin(w*dt)*(particleState.y-Iccy) + Iccx
+    y = sin(w*dt)*(particleState.x-Iccx) + cos(w*dt)*(particleState.y-Iccy) + Iccy
+    theta = particleState.theta + w*dt
+    
+    newState = copy(particleState)
+    
+    # Suppress movement noise
+#    minDist = 0.005
+#    if (np.linalg.norm([particleState.x-x, particleState.y-y]) < minDist):
+#        return newState
+
+    newState.x = x
+    newState.y = y
+    newState.theta = theta
+    newState.radius = particleState.radius+nrand(0.0001)
+    newState.gyro_offset = particleState.gyro_offset#+nrand(0.00001)
+    newState.timestamp = move['time']
+    return newState
+
 
 
 def odoMeasurementModel (particleOdomState, *orbPoses):

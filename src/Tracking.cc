@@ -53,6 +53,9 @@ namespace ORB_SLAM
 {
 
 
+string externalLocalizationFrame1, externalLocalizationFrame2;
+
+
 Tracking::Tracking(ORBVocabulary* pVoc, FramePublisher *pFramePublisher, MapPublisher *pMapPublisher, Map *pMap, string strSettingPath):
     mState(NO_IMAGES_YET), mpORBVocabulary(pVoc), mpFramePublisher(pFramePublisher), mpMapPublisher(pMapPublisher), mpMap(pMap),
     mnLastRelocFrameId(0), mbPublisherStopped(false), mbReseting(false), mbForceRelocalisation(false), mbMotionModel(false),
@@ -158,6 +161,11 @@ Tracking::Tracking(ORBVocabulary* pVoc, FramePublisher *pFramePublisher, MapPubl
     tf::Transform tfT;
     tfT.setIdentity();
     mTfBr.sendTransform(tf::StampedTransform(tfT,ros::Time::now(), "/ORB_SLAM/World", "/ORB_SLAM/Camera"));
+
+    if (useExternalLocalisation==true) {
+    	externalLocalizationFrame1 = (string)fSettings["ExternalLocalization.from"];
+    	externalLocalizationFrame2 = (string)fSettings["ExternalLocalization.to"];
+    }
 }
 
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
@@ -417,7 +425,7 @@ void Tracking::ProcessImage (cv::Mat &im, double timestamp)
 
         mTfBr.sendTransform(tf::StampedTransform(tfTcw,ros::Time::now(), "ORB_SLAM/World", "ORB_SLAM/Camera"));
 
-        if (mpMap->MapIsReadonly==true) {
+        if (mpMap->MapIsReadonly==true && useExternalLocalisation==true) {
         	tf::Transform tfExt;
         	externalLocalise(tfTcw, tfExt);
         	mTfBr.sendTransform(tf::StampedTransform(tfExt,ros::Time::now(), "ORB_SLAM/World", "ORB_SLAM/ExtCamera"));
@@ -462,8 +470,8 @@ void Tracking::FirstInitialization()
 {
     //We ensure a minimum ORB features to continue, otherwise discard frame
 	const int minOrbFeatNum =
-		100;
-//		25;
+//		100;
+		25;
     if(mCurrentFrame.mvKeys.size() > minOrbFeatNum)
     {
         mInitialFrame = Frame(mCurrentFrame);
@@ -485,8 +493,8 @@ void Tracking::Initialize()
 {
     // Check if current frame has enough keypoints, otherwise reset initialization process
 	const int minOrbFeatNum =
-		100;
-//		25;
+//		100;
+		25;
 
     if(mCurrentFrame.mvKeys.size()<=minOrbFeatNum)
     {

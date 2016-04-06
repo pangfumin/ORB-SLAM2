@@ -67,7 +67,10 @@ void LoopClosing::Run()
     	if (stopChild==true)
     		break;
 
-    	checkPosition();
+    	// We put external localization here so that it may run in different thread
+    	if (mpTracker->useExternalLocalisation==true) {
+    		checkPosition();
+    	}
 
         // Check if there are keyframes in the queue
         if(CheckNewKeyFrames())
@@ -232,8 +235,10 @@ bool LoopClosing::DetectLoop()
 }
 
 
-const string ndtFrameSrc = "/base_link",
-	ndtFrameDst = "/map";
+//const string ndtFrameSrc = "/base_link",
+//	ndtFrameDst = "/map";
+extern string externalLocalizationFrame1, externalLocalizationFrame2;
+
 
 void LoopClosing::checkPosition()
 {
@@ -241,7 +246,8 @@ void LoopClosing::checkPosition()
 
 	try {
 		// XXX: Do we need to reverse this order?
-		extListener.lookupTransform (ndtFrameDst, ndtFrameSrc, ros::Time(0), extPose);
+		//extListener.lookupTransform (ndtFrameDst, ndtFrameSrc, ros::Time(0), extPose);
+		extListener.lookupTransform (externalLocalizationFrame2, externalLocalizationFrame1, ros::Time(0), extPose);
 	} catch (tf::TransformException &e) {}
 }
 
