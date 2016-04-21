@@ -4,10 +4,10 @@
 # These settings apply when input are reduced to 800x600
 
 # Camera calibration parameters (OpenCV) 
-Camera.fx: 479.570576946
-Camera.fy: 479.570576946
-Camera.cx: 411.879719484
-Camera.cy: 288.668313855
+Camera.fx: 613.850338491
+Camera.fy: 613.850338491
+Camera.cx: 527.206040940
+Camera.cy: 369.495441735
 
 # Camera distortion paremeters (OpenCV) --
 Camera.k1: 0
@@ -28,7 +28,7 @@ Camera.compressed: 1
 ### Changing the parameters below could seriously degradate the performance of the system
 
 # ORB Extractor: Number of features per image
-ORBextractor.nFeatures: 3000
+ORBextractor.nFeatures: 3500
 
 # ORB Extractor: Scale factor between levels in the scale pyramid 	
 ORBextractor.scaleFactor: 1.2

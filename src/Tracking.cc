@@ -294,6 +294,10 @@ void Tracking::grabImageFromROS (const sensor_msgs::ImageConstPtr &msg)
     	cv::resize (im, im, cv::Size(forceWidth, forceHeight));
     }
 
+    // Hack for cropping the dashboard portion
+    //cv::Rect ROI (0, 0, forceWidth, 549);
+    //cv::Mat im2 = im(ROI).clone();
+
     if (localizationOnly==true)
     	ProcessImageLocalizer(im, cv_ptr->header.stamp.toSec());
     else
@@ -499,7 +503,7 @@ void Tracking::Initialize()
     if(mCurrentFrame.mvKeys.size()<=minOrbFeatNum)
     {
         fill(mvIniMatches.begin(),mvIniMatches.end(),-1);
-        cout << "Initialize() failed: 1" << endl;
+        cout << "Initialize() failed: -1" << endl;
         mState = NOT_INITIALIZED;
         return;
     }    
@@ -511,7 +515,7 @@ void Tracking::Initialize()
     // Check if there are enough correspondences
     if(nmatches < minOrbFeatNum)
     {
-    	cout << "Initialize() failed: 2" << endl;
+    	cout << "Initialize() failed: " << nmatches << endl;
         mState = NOT_INITIALIZED;
         return;
     }  
@@ -596,7 +600,7 @@ void Tracking::CreateInitialMap(cv::Mat &Rcw, cv::Mat &tcw)
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
     float invMedianDepth = 1.0f/medianDepth;
 
-    if(medianDepth<0 || pKFcur->TrackedMapPoints()<100)
+    if(medianDepth<0 || pKFcur->TrackedMapPoints()<25)
     {
         ROS_INFO("Wrong initialization, reseting...");
         Reset();
